@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    @font-face {
+      font-family: 'Outfit';
+      src: url(./fonts/Outfit.ttf);
+    }
+}
