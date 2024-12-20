@@ -1,9 +1,14 @@
 import type { FC, PropsWithChildren } from 'react';
 import '../styles.css'
+import QueryProvider from '../components/QueryProvider';
 
 const App: FC<PropsWithChildren> = (props) => {
     
-    return props.children
+    return (
+        <QueryProvider>
+            { props.children }
+        </QueryProvider>
+    )
 };
 
 export default App;

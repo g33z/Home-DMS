@@ -5,7 +5,7 @@ import Document from './document/Document';
 import { DocumentSource, useDocuments } from '../lib/document/hooks';
 
 interface DocumentsProps {
-    documents: Promise<DocumentSource[]>
+    documents: DocumentSource[]
 }
 
 const Documents: FC<DocumentsProps> = (props) => {

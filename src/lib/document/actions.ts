@@ -1,6 +1,5 @@
 'use server'
 
-import { ne } from "drizzle-orm"
 import { db } from "../db"
 import supabase from "../supabase/client"
 import { throwOnError } from "../supabase/utils"
@@ -33,10 +32,12 @@ export async function getDocuments() {
             );
         })
 
+    
+
     return documents.map(document => ({
         id: document.id,
         name: (document.userMetadata as Record<string, string>).name!,
         path: document.name!,
         url: urls.find(({path}) => path === document.name)?.signedUrl!
-    }))
+    }));
 }
