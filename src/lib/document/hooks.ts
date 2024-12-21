@@ -1,25 +1,7 @@
-import { useEffect, useState, useSyncExternalStore } from "react"
+import { useEffect, useState } from "react"
+import { getDocumentPreview } from "./actions"
+import { CHANNEL, DOCUMENT } from "../supabase/realtime"
 import supabase from "../supabase/client"
-import { getDocuments } from "./actions"
-
-export function useDocumentsChange(onChange: () => void){
-    useEffect(() => {
-        const channel = supabase
-            .channel('schema-db-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'documents'
-                },
-                onChange
-            )
-            .subscribe()
-
-        return () => { channel.unsubscribe() }
-    }, [])
-}
 
 export interface DocumentSource {
     id: number
@@ -30,7 +12,28 @@ export interface DocumentSource {
 export function useDocuments(documents: DocumentSource[]){
     const [documentUrls, setDocumentUrls] = useState<DocumentSource[]>(documents);
 
-    useDocumentsChange(() => getDocuments().then(d => setDocumentUrls(d)))
+    useEffect(() => {
+        const channel = supabase
+            .channel(CHANNEL.DOCUMENT)
+            .on('broadcast', { event: DOCUMENT.NEW }, ({ payload }) => {
+                    return getDocumentPreview(payload.id)
+                    .then(newDoc => { 
+                        if(newDoc === undefined) throw new Error(`Received new document event but ${payload.id} doesn't exist`);
+                        return newDoc
+                    })
+                    .then(newDoc => setDocumentUrls(oldDocs => [
+                        ...oldDocs,
+                        newDoc
+                    ]))
+                }
+            )
+            .on('broadcast', { event: DOCUMENT.DELETE }, ({ payload }) => setDocumentUrls(docs => 
+                docs.filter(doc => doc.id !== payload.id)
+            ))
+            .subscribe()
+
+        return () => { channel.unsubscribe() }
+    }, []);
 
     return documentUrls;
 }

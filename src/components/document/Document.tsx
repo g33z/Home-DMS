@@ -1,9 +1,7 @@
-'use client'
-
 import type { FC } from 'react';
 import DeleteButton from './DeleteButton';
 import type { DocumentSource } from '../../lib/document/hooks';
-import { useMutation } from '@tanstack/react-query';
+import { Link } from 'waku';
 
 interface DocumentProps {
     document: DocumentSource
@@ -12,7 +10,9 @@ interface DocumentProps {
 const Document: FC<DocumentProps> = (props) => {
     return (
         <article className='flex flex-col gap-1'>
-            <img src={ props.document.thumbnail } className='h-full object-cover' />
+            <Link to={ `/doc/${props.document.id}` } >
+                <img src={ props.document.thumbnail } className='h-full object-cover' />
+            </Link> 
             <h2 className='flex'>
                 { props.document.name }
                 <DeleteButton className='ml-auto' documentId={ props.document.id }/>
