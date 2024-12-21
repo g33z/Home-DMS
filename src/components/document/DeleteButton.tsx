@@ -1,26 +1,23 @@
 'use client'
 
-import { useEffect, type FC } from 'react';
-import supabase from '../../lib/supabase/client';
+import { type FC } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { removeDocument } from '../../lib/document/actions';
 
 interface DeleteButtonProps {
     className?: string
-    filePath: string
+    documentId: number
 }
 
 const DeleteButton: FC<DeleteButtonProps> = (props) => {
-    
-
-    function deleteDoc(){
-        supabase.storage
-            .from('documents')
-            .remove([props.filePath])
-    }
+    const deleteDoc = useMutation({
+        mutationFn: removeDocument
+    })
     
     return (
         <button 
             className={ props.className }
-            onClick={ deleteDoc }
+            onClick={ () => deleteDoc.mutate(props.documentId) }
         >
             x
         </button>

@@ -1,15 +1,9 @@
-import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
+import { bigint, bigserial, integer, pgTable, varchar } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { jsonb, pgSchema, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-export const usersTable = pgTable("users", {
-	id: integer().primaryKey().generatedAlwaysAsIdentity(),
-	name: varchar({ length: 255 }).notNull(),
-	age: integer().notNull(),
-	email: varchar({ length: 255 }).notNull().unique(),
-});
 
-import { sql } from "drizzle-orm";
-import { foreignKey, jsonb, pgSchema, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
-
+// supabase internal schema for storage objectss
 export const storage = pgSchema('storage');
 export const storageObjects = storage.table(
 	"objects", 
@@ -28,3 +22,25 @@ export const storageObjects = storage.table(
 		userMetadata: jsonb('user_metadata'),
 	}
 );
+
+export const documentTable = pgTable('documents', {
+	id: bigserial({ mode: "number" }).primaryKey(),
+	name: text().notNull()
+})
+
+export const pageTable = pgTable('documentPages', {
+	storagePath: text().primaryKey(),
+	documentId: bigint({ mode: "number" }).references(() => documentTable.id).notNull(),
+	page: integer().notNull()
+})
+
+export const documentRelations = relations(documentTable, ({ many }) => ({
+	pages: many(pageTable)
+}))
+
+export const pageRelations = relations(pageTable, ({ one }) => ({
+	document: one(documentTable, {
+		fields: [pageTable.documentId],
+		references: [documentTable.id]
+	})
+}))

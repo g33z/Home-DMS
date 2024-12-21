@@ -1,4 +1,3 @@
-import { Link } from "waku";
 import Documents from "../components/Documents";
 import { getDocuments } from "../lib/document/actions";
 import Icon from '../images/Icon.svg';
