@@ -11,7 +11,7 @@ const Document: FC<DocumentProps> = (props) => {
     return (
         <article className='flex flex-col gap-1'>
             <Link to={ `/doc/${props.document.id}` } >
-                <img src={ props.document.thumbnail } className='h-full object-cover' />
+                <img loading='lazy' src={ props.document.thumbnail } className='h-full object-cover' />
             </Link> 
             <h2 className='flex'>
                 { props.document.name }

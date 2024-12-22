@@ -1,6 +1,6 @@
 'use server'
 
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { db } from "../db"
 import { documentTable, pageTable } from "../db/schema"
 import supabase from "../supabase/client"
