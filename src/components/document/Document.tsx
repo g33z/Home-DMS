@@ -1,10 +1,10 @@
 import type { FC } from 'react';
 import DeleteButton from './DeleteButton';
-import type { DocumentSource } from '../../lib/document/hooks';
 import { Link } from 'waku';
+import { DocumentPreview } from '../../lib/document/actions';
 
 interface DocumentProps {
-    document: DocumentSource
+    document: DocumentPreview
 }
 
 const Document: FC<DocumentProps> = (props) => {
@@ -14,7 +14,7 @@ const Document: FC<DocumentProps> = (props) => {
                 <img loading='lazy' src={ props.document.thumbnail } className='h-full object-cover' />
             </Link> 
             <h2 className='flex'>
-                { props.document.name }
+                { props.document.tagKeywords.join(' ') }
                 <DeleteButton className='ml-auto' documentId={ props.document.id }/>
             </h2>
         </article>

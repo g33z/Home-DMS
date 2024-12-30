@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react"
-import { getDocumentPreview } from "./actions"
+import { DocumentPreview, getDocumentPreview } from "./actions"
 import { CHANNEL, DOCUMENT } from "../supabase/realtime"
 import supabase from "../supabase/client"
 
-export interface DocumentSource {
-    id: number
-    name: string
-    thumbnail: string
-}
 
-export function useDocuments(documents: DocumentSource[]){
-    const [documentUrls, setDocumentUrls] = useState<DocumentSource[]>(documents);
+export function useDocuments(prefetchedDocs: DocumentPreview[]){
+    const [documents, setDocuments] = useState<DocumentPreview[]>(prefetchedDocs);
 
     useEffect(() => {
         const channel = supabase
@@ -21,13 +16,13 @@ export function useDocuments(documents: DocumentSource[]){
                         if(newDoc === undefined) throw new Error(`Received new document event but ${payload.id} doesn't exist`);
                         return newDoc
                     })
-                    .then(newDoc => setDocumentUrls(oldDocs => [
+                    .then(newDoc => setDocuments(oldDocs => [
                         ...oldDocs,
                         newDoc
                     ]))
                 }
             )
-            .on('broadcast', { event: DOCUMENT.DELETE }, ({ payload }) => setDocumentUrls(docs => 
+            .on('broadcast', { event: DOCUMENT.DELETE }, ({ payload }) => setDocuments(docs => 
                 docs.filter(doc => doc.id !== payload.id)
             ))
             .subscribe()
@@ -35,5 +30,5 @@ export function useDocuments(documents: DocumentSource[]){
         return () => { channel.unsubscribe() }
     }, []);
 
-    return documentUrls;
+    return documents;
 }

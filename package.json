@@ -26,7 +26,7 @@
     "react-textarea-autosize": "^8.5.6",
     "server-only": "^0.0.1",
     "tailwind-merge": "^2.5.5",
-    "waku": "0.21.9"
+    "waku": "https://pkg.csb.dev/dai-shi/waku/commit/9dd82a94/waku"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.19",

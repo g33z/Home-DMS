@@ -2,15 +2,36 @@
 
 import { eq, inArray } from "drizzle-orm"
 import { db } from "../db"
-import { documentTable, pageTable } from "../db/schema"
+import { documentTable, documentToTagTable, pageTable, tagTable } from "../db/schema"
 import supabase from "../supabase/client"
 import { throwOnError } from "../supabase/utils"
 import { CHANNEL, DOCUMENT } from "../supabase/realtime"
 
-export async function getDocuments() {
+export interface DocumentPreview {
+    id: number,
+    tagKeywords: string[],
+    thumbnail: string
+}
+
+export interface DocumentDetails {
+    id: number,
+    tagKeywords: string[],
+    pages: string[]
+}
+
+export async function getDocumentPreviews(): Promise<DocumentPreview[]> {
     const documents = await db.query.documentTable.findMany({
         with: {
-            pages: true
+            pages: true,
+            documentsToTag: {
+                with: {
+                    tag: {
+                        columns: {
+                            keyword: true
+                        }
+                    }
+                }
+            }
         }
     })
 
@@ -34,7 +55,7 @@ export async function getDocuments() {
     
     return documents.map(document => ({
         id: document.id,
-        name: document.name,
+        tagKeywords: document.documentsToTag.map(({ tag }) => tag.keyword),
         thumbnail: urls
             .find(u => u.path === document.pages[0]?.storagePath)!
             .signedUrl
@@ -42,11 +63,20 @@ export async function getDocuments() {
 }
 
 
-export async function getDocumentPreview(id: number) {
+export async function getDocumentPreview(id: number): Promise<DocumentPreview | undefined> {
     const document = await db.query.documentTable.findFirst({
         where: eq(documentTable.id, id),
         with: {
-            pages: true
+            pages: true,
+            documentsToTag: {
+                with: {
+                    tag: {
+                        columns: {
+                            keyword: true
+                        }
+                    }
+                }
+            }
         }
     })
 
@@ -54,7 +84,7 @@ export async function getDocumentPreview(id: number) {
 
     return {
         id: document.id,
-        name: document.name,
+        tagKeywords: document.documentsToTag.map(({ tag }) => tag.keyword),
         thumbnail: await supabase.storage
             .from('documents')
             .createSignedUrl(document.pages[0]!.storagePath, 60)
@@ -64,11 +94,20 @@ export async function getDocumentPreview(id: number) {
 }
 
 
-export async function getDocumentDetails(id: number) {
+export async function getDocumentDetails(id: number): Promise<DocumentDetails | undefined> {
     const document = await db.query.documentTable.findFirst({
         where: eq(documentTable.id, id),
         with: {
-            pages: true
+            pages: true,
+            documentsToTag: {
+                with: {
+                    tag: {
+                        columns: {
+                            keyword: true
+                        }
+                    }
+                }
+            }
         }
     })
 
@@ -92,7 +131,7 @@ export async function getDocumentDetails(id: number) {
 
     return {
         id: document.id,
-        name: document.name,
+        tagKeywords: document.documentsToTag.map(({ tag }) => tag.keyword),
         pages: document.pages
             .sort((a, b) => a.page - b.page)
             .map(page => urls
@@ -103,33 +142,33 @@ export async function getDocumentDetails(id: number) {
 }
 
 
-interface AddDocumentOptions {
-    name: string, 
-    pages: File[]
-}
-
-export async function addDocument(options: AddDocumentOptions){
-    const pages = await Promise.all(options.pages.map(page => supabase.storage
-        .from('documents')
-        .upload(
-            crypto.randomUUID(), 
-            page, 
-            { cacheControl: '31536000' }
-        )
-        .then(throwOnError)
-    ));
-
+export async function addDocument(options: {
+    tags: string[], 
+    pagePaths: string[]
+}){
     const [ document ] = await db
         .insert(documentTable)
-        .values({ name: options.name })
+        .values({})
         .returning({ id: documentTable.id });
 
     await db
         .insert(pageTable)
-        .values(pages.map((page, index) => ({
+        .values(options.pagePaths.map((path, index) => ({
             page: index,
-            storagePath: page.path,
+            storagePath: path,
             documentId: document!.id
+        })))
+
+    const tagIds = await db
+        .insert(tagTable)
+        .values(options.tags.map(t => ({ keyword: t })))
+        .returning({ id: tagTable.id })
+
+    await db
+        .insert(documentToTagTable)
+        .values(tagIds.map(({ id }) => ({
+            documentId: document!.id,
+            tagId: id
         })))
 
     await supabase.realtime.channel(CHANNEL.DOCUMENT).send({
@@ -141,6 +180,10 @@ export async function addDocument(options: AddDocumentOptions){
 
 
 export async function removeDocument(id: number){
+    await db
+        .delete(documentToTagTable)
+        .where(eq(documentToTagTable.documentId, id))
+
     const pages = await db
         .delete(pageTable)
         .where(eq(pageTable.documentId, id))

@@ -1,33 +1,46 @@
 import 'dotenv/config'
 import { db } from "../src/lib/db";
-import { pageTable, documentTable } from "../src/lib/db/schema";
+import { pageTable, documentTable, documentToTagTable, tagTable } from "../src/lib/db/schema";
 import supabase from "../src/lib/supabase/client";
 import { throwOnError } from "../src/lib/supabase/utils";
 import fs from 'fs';
-import documentTitles from "./data/documentTitles";
+import documentTags from "./data/documentTags";
 import ora from 'ora';
 import { bucketUrl, imageNames } from './data/imageUrls';
 import { finished } from 'stream/promises';
 import { Readable } from 'stream';
 
-const imagesPath = 'test/data/images';
+const IMAGES_PATH = 'test/data/images';
+const NUMBER_OF_DOCUMENTS = 200;
 
-if (!fs.existsSync(imagesPath)){
-    fs.mkdirSync(imagesPath);
+let tagIdsInDb: number[] = []
+
+if (!fs.existsSync(IMAGES_PATH)){
+    fs.mkdirSync(IMAGES_PATH);
 }
 
 function getRandomImagePaths(){
-    const imagePaths = fs.readdirSync(imagesPath)
-    let filteredPaths = fs.readdirSync(imagesPath).filter(() => Math.random() < 0.08);
+    const imagePaths = fs.readdirSync(IMAGES_PATH)
+    const filteredPaths = fs.readdirSync(IMAGES_PATH).filter(() => Math.random() < 0.08);
 
     if(filteredPaths.length === 0){
-        filteredPaths = [ imagePaths[0]! ];
+        filteredPaths.push(imagePaths[0]!);
     }
 
     return filteredPaths;
 }
 
-async function removeAllDOcuments(){
+function getRandomTagIds(){
+    const filteredTags = tagIdsInDb.filter(() => Math.random() < 0.01)
+
+    if(filteredTags.length === 0){
+        filteredTags.push(tagIdsInDb[0]!)
+    }
+
+    return filteredTags;
+}
+
+async function removeAllDocuments(){
     const pages = await db
         .delete(pageTable)
         .returning({ path: pageTable.storagePath });
@@ -36,16 +49,26 @@ async function removeAllDOcuments(){
         .from('documents')
         .remove(pages.map(p => p.path));
 
-    await db
-        .delete(documentTable);
+    await db.delete(documentTable);
 }
 
-async function addTestDocument(title: string, pagePaths: string[]) {
+async function removeAllTags() {
+    await db.delete(documentToTagTable);
+    await db.delete(tagTable);
+}
+
+async function addAllTags() {
+    await db
+        .insert(tagTable)
+        .values(documentTags.map(keyword => ({ keyword })))
+}
+
+async function addTestDocument(tagIds: number[], pagePaths: string[]) {
     const pages = await Promise.all(pagePaths.map(pagePath => supabase.storage
         .from('documents')
         .upload(
             crypto.randomUUID(), 
-            fs.readFileSync(`${imagesPath}/${pagePath}`), 
+            fs.readFileSync(`${IMAGES_PATH}/${pagePath}`), 
             { cacheControl: '31536000' }
         )
         .then(throwOnError)
@@ -53,8 +76,8 @@ async function addTestDocument(title: string, pagePaths: string[]) {
 
     const [ document ] = await db
         .insert(documentTable)
-        .values({ name: title })
-        .returning({ id: documentTable.id });
+        .values({})
+        .returning();
 
     await db
         .insert(pageTable)
@@ -63,16 +86,23 @@ async function addTestDocument(title: string, pagePaths: string[]) {
             storagePath: page.path,
             documentId: document!.id
         })))
+    
+    await db
+        .insert(documentToTagTable)
+        .values(tagIds.map(tagId => ({
+            documentId: document!.id,
+            tagId
+        })))
 }
 
 async function addTestDocuments() {
-    const log = (doc: number) => `Uploading Document ${doc}/${documentTitles.length}`
+    const log = (doc: number) => `Uploading Document ${doc}/${NUMBER_OF_DOCUMENTS}`
 
     const spinner = ora(log(1)).start();
 
-    for (let index = 0; index < documentTitles.length; index++) {
+    for (let index = 0; index < NUMBER_OF_DOCUMENTS; index++) {
         spinner.text = log(index+1)
-        await addTestDocument(documentTitles[index]!, getRandomImagePaths());
+        await addTestDocument(getRandomTagIds(), getRandomImagePaths());
     }
 
     spinner.succeed('Added all test data.')
@@ -85,7 +115,7 @@ async function downloadTestImages() {
     for (let index = 0; index < imageNames.length; index++) {
         spinner.text = log(index+1)
         const res = await fetch(`${bucketUrl}/${imageNames[index]}`)
-        const fileStream = fs.createWriteStream(`${imagesPath}/${imageNames[index]}`, { flags: 'wx' });
+        const fileStream = fs.createWriteStream(`${IMAGES_PATH}/${imageNames[index]}`, { flags: 'wx' });
         await finished(Readable.fromWeb(res.body!).pipe(fileStream));
     }
 
@@ -93,7 +123,7 @@ async function downloadTestImages() {
 }
 
 async function main() {
-    if(fs.readdirSync(imagesPath).length === 0){
+    if(fs.readdirSync(IMAGES_PATH).length === 0){
         console.log('Could not find test images')
         console.log('Downloading them now...')
         await downloadTestImages()
@@ -101,12 +131,20 @@ async function main() {
 
     console.log('Clearing db and filling it with testdata...')
 
+    const tagSpinner = ora('Removing and re-adding tags...')
+    await removeAllTags()
+    await addAllTags()
+    tagIdsInDb = (await db.query.tagTable
+        .findMany({ columns: { id: true } }))
+        .map(t => t.id)
+    tagSpinner.succeed('Re-added all tags.')
+
     const removeSpinner = ora('Removing all existing documents...')
-    await removeAllDOcuments()
+    await removeAllDocuments()
     removeSpinner.succeed('Removed all existing documents.')
 
     await addTestDocuments()
-
+    
     console.log('Finished!')
     process.exit()
 }

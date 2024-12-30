@@ -1,11 +1,12 @@
 'use client'
 
-import type { FC } from 'react';
+import { useId, type FC } from 'react';
 import Document from './document/Document';
-import { DocumentSource, useDocuments } from '../lib/document/hooks';
+import { useDocuments } from '../lib/document/hooks';
+import { DocumentPreview } from '../lib/document/actions';
 
 interface DocumentsProps {
-    documents: DocumentSource[]
+    documents: DocumentPreview[]
 }
 
 const Documents: FC<DocumentsProps> = (props) => {

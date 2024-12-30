@@ -1,11 +1,11 @@
 import Documents from "../components/Documents";
-import { getDocuments } from "../lib/document/actions";
+import { getDocumentPreviews } from "../lib/document/actions";
 import Icon from '../images/Icon.svg';
-import Upload from "../components/upload/Upload";
+import GoToNew from "../components/upload/GoToNew";
 
 
 export default async function HomePage() {
-	const documents = await getDocuments();
+	const documents = await getDocumentPreviews();
 
 	return (
 		<div className='grid grid-rows-[auto_1fr] h-screen'>
@@ -25,7 +25,7 @@ export default async function HomePage() {
 			</header>
 			<main className='overflow-y-auto'>
 				<Documents documents={ documents }/>
-				<Upload className='absolute bottom-10 right-10'/>
+				<GoToNew className='absolute bottom-8 right-8'/>
 			</main>
 		</div>
 	);

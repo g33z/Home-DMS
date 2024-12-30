@@ -10,6 +10,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "types": ["react/experimental", "node", "vite/client"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "noEmit": true
   }
 }
