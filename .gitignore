@@ -7,3 +7,4 @@ dist
 *.pem
 *.gen.ts
 test/data/images
+.vscode

@@ -33,8 +33,8 @@ const DocumentDetails: FC<DocumentDetailsProps> = async (props) => {
                 <section className='m-2'>
                     <h3 className='text-lg font-bold text-gray-300'>Tags</h3>
                     <div className='flex gap-1 m-2'>
-                        { document.tagKeywords.map(tag =>
-                            <Tag keyword={ tag }/>
+                        { document.tags.map(tag =>
+                            <Tag keyword={ tag.keyword } key={ tag.id }/>
                         )}
                     </div>
                 </section>

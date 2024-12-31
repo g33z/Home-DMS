@@ -15,7 +15,10 @@ export interface DocumentPreview {
 
 export interface DocumentDetails {
     id: number,
-    tagKeywords: string[],
+    tags: {
+        id: number,
+        keyword: string
+    }[],
     pages: string[]
 }
 
@@ -131,7 +134,10 @@ export async function getDocumentDetails(id: number): Promise<DocumentDetails | 
 
     return {
         id: document.id,
-        tagKeywords: document.documentsToTag.map(({ tag }) => tag.keyword),
+        tags: document.documentsToTag.map(relation => ({
+            id: relation.tagId,
+            keyword: relation.tag.keyword
+        })),
         pages: document.pages
             .sort((a, b) => a.page - b.page)
             .map(page => urls
