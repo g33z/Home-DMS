@@ -4,8 +4,26 @@ import { CHANNEL, DOCUMENT } from "../supabase/realtime"
 import supabase from "../supabase/client"
 
 
-export function useDocuments(prefetchedDocs: DocumentPreview[]){
+function filterDocuments(documents: DocumentPreview[], search: string | undefined){
+    if(!search) return documents
+
+    return documents.filter(doc => 
+        search.trim().toLowerCase().split(' ').every(query => 
+            doc.tagKeywords.some(keyword => 
+                keyword.toLowerCase() === query
+            )
+        )
+    );
+}
+
+
+export function useDocuments(prefetchedDocs: DocumentPreview[], search?: string){
     const [documents, setDocuments] = useState<DocumentPreview[]>(prefetchedDocs);
+    const [filteredDocuments, setFilteredDocuments] = useState(documents);
+
+    useEffect(() => {
+        setFilteredDocuments(filterDocuments(documents, search))
+    }, [documents, search]);
 
     useEffect(() => {
         const channel = supabase
@@ -30,5 +48,6 @@ export function useDocuments(prefetchedDocs: DocumentPreview[]){
         return () => { channel.unsubscribe() }
     }, []);
 
-    return documents;
+
+    return filteredDocuments;
 }
