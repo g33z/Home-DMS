@@ -29,24 +29,24 @@ const DocumentDetails: FC<DocumentDetailsProps> = async (props) => {
                     <span className='iconify lucide--x m-6'></span>
                 </Link>
             </h2>
-            <section className='m-2'>
-                <h3 className='text-lg font-bold text-gray-300'>Tags</h3>
-                <div className='flex gap-1 m-2'>
-                    { document.tagKeywords.map(tag => 
-                        <Tag keyword={ tag }/>
-                    )}
-                </div>
-            </section>
-            <section className='m-2'>
-                <h3 className='text-lg font-bold text-gray-300'>Pages</h3>
-                <div className='overflow-y-auto ml-3 pr-2 mr-1'>
-                    <div className='flex flex-col gap-3 my-5'>
+            <div className='overflow-y-auto'>
+                <section className='m-2'>
+                    <h3 className='text-lg font-bold text-gray-300'>Tags</h3>
+                    <div className='flex gap-1 m-2'>
+                        { document.tagKeywords.map(tag =>
+                            <Tag keyword={ tag }/>
+                        )}
+                    </div>
+                </section>
+                <section className='m-2'>
+                    <h3 className='text-lg font-bold text-gray-300'>Pages</h3>
+                    <div className='flex flex-col gap-3 m-2'>
                         { document.pages.map(pageUrl =>
                             <img key={ pageUrl } src={ pageUrl }/>
                         ) }
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
     );
 };
