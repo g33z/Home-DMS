@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import DeleteButton from './DeleteButton';
 import { Link } from 'waku';
-import { DocumentPreview } from '../../lib/document/actions';
+import { DocumentPreview } from '../../../lib/document/actions';
 
 interface DocumentProps {
     document: DocumentPreview

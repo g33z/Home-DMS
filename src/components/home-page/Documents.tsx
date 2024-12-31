@@ -2,8 +2,8 @@
 
 import { useId, type FC } from 'react';
 import Document from './document/Document';
-import { useDocuments } from '../lib/document/hooks';
-import { DocumentPreview } from '../lib/document/actions';
+import { useDocuments } from '../../lib/document/hooks';
+import { DocumentPreview } from '../../lib/document/actions';
 
 interface DocumentsProps {
     documents: DocumentPreview[]

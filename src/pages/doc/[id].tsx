@@ -32,7 +32,7 @@ const DocumentDetails: FC<DocumentDetailsProps> = async (props) => {
             <div className='overflow-y-auto'>
                 <section className='m-2'>
                     <h3 className='text-lg font-bold text-gray-300'>Tags</h3>
-                    <div className='flex gap-1 m-2'>
+                    <div className='flex gap-1 m-2 flex-wrap pb-2'>
                         { document.tags.map(tag =>
                             <Tag keyword={ tag.keyword } key={ tag.id }/>
                         )}

@@ -2,7 +2,7 @@
 
 import { type FC } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { removeDocument } from '../../lib/document/actions';
+import { removeDocument } from '../../../lib/document/actions';
 
 interface DeleteButtonProps {
     className?: string
