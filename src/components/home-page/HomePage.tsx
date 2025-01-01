@@ -13,11 +13,14 @@ interface HomePageProps {
 }
 
 const HomePage: FC<HomePageProps> = (props) => {
+    const [searchbarValue, setSearchbarValue] = useState('');
     const [search, setSearch] = useState('');
 
     const documents = useDocuments(props.documents, search);
 
     function onSearch(query: string){
+        setSearchbarValue(query)
+
         if(query === ''){
             setSearch('');
             return;
@@ -27,13 +30,24 @@ const HomePage: FC<HomePageProps> = (props) => {
     }
     
     return (
-        <div className='grid grid-rows-[auto_1fr] h-screen'>
+        <div className='grid grid-rows-[auto_1fr] h-screen bg-gray-900'>
 			<header className="bg-gray-800 px-5 py-3 flex gap-5 shadow-lg">
 				<img src={ Icon } alt="Home-DMS Logo" className="w-8" />
-				<Searchbar onChange={ onSearch } onSubmit={ setSearch }/>
+				<Searchbar value={ searchbarValue } onChange={ onSearch } onSubmit={ setSearch }/>
 			</header>
 			<main className='overflow-y-auto'>
-				<Documents documents={ documents }/>
+				<Documents 
+                    documents={ documents } 
+                    onTagClick={ keyword => 
+                        setSearchbarValue(v => {
+                            const query = v
+                                ? `${searchbarValue} ${keyword}`
+                                : keyword;
+                            setSearch(query);
+                            return query;
+                        })
+                    }
+                />
 				<GoToNew className='absolute bottom-8 right-8'/>
 			</main>
 		</div>

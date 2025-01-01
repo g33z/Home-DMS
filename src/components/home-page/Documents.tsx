@@ -6,6 +6,7 @@ import { DocumentPreview } from '../../lib/document/actions';
 
 interface DocumentsProps {
     documents: DocumentPreview[]
+    onTagClick: (keyword: string) => void
 }
 
 const Documents: FC<DocumentsProps> = (props) => {
@@ -14,9 +15,9 @@ const Documents: FC<DocumentsProps> = (props) => {
     );
 
     return (
-        <div className='grid grid-cols-2 m-5 gap-5'>
+        <div className='grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-5 p-5 text-white'>
             { props.documents.map(document => 
-                <Document key={ document.id } document={ document }/>
+                <Document key={ document.id } document={ document } onTagClick={ props.onTagClick }/>
             ) }
         </div>
     )

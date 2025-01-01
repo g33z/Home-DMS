@@ -1,24 +1,44 @@
 import type { FC } from 'react';
-import DeleteButton from './DeleteButton';
 import { Link } from 'waku';
 import { DocumentPreview } from '../../../lib/document/actions';
+import Tag from '../../Tag';
 
 interface DocumentProps {
     document: DocumentPreview
+    onTagClick: (keyword: string) => void
 }
 
 const Document: FC<DocumentProps> = (props) => {
-    return (
-        <article className='flex flex-col gap-1'>
-            <Link to={ `/doc/${props.document.id}` } >
-                <img loading='lazy' src={ props.document.thumbnail } className='h-full object-cover' />
-            </Link> 
-            <h2 className='flex'>
-                { props.document.tagKeywords.join(' ') }
-                <DeleteButton className='ml-auto' documentId={ props.document.id }/>
-            </h2>
+    const halfLength = Math.ceil(props.document.tags.length / 2)
+
+    const tags = [
+        props.document.tags.slice(0, halfLength),
+        props.document.tags.slice(halfLength)
+    ] as const
+
+    return (<>
+        <article className="bg-gray-800 rounded-xl relative overflow-hidden h-40 text-sm flex flex-col items-stretch">
+            <Link to={ `/doc/${props.document.id}` } className="relative overflow-hidden">
+                <img loading='lazy' src={ props.document.thumbnail } className='p-5 pb-px object-cover min-h-[10rem]'/>     
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.4)] to-transparent mx-5 mb-0 mt-12"></div>
+            </Link>
+            <div className="bg-gray-700 p-2 relative min-h-[4rem]">
+                <div className='flex flex-col gap-1'>
+                    <span className='flex gap-1'>
+                        { tags[0].map(tag =>
+                            <Tag key={ tag.id } keyword={ tag.keyword } onClick={ () => props.onTagClick(tag.keyword) }/>
+                        ) }
+                    </span>
+                    <span className='flex gap-1'>
+                        { tags[1].map(tag =>
+                            <Tag key={ tag.id } keyword={ tag.keyword } onClick={ () => props.onTagClick(tag.keyword) }/>
+                        ) }
+                    </span>
+                </div>
+                <div className='absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-r from-transparent to-gray-700'></div>
+            </div>
         </article>
-    );
+    </>);
 };
 
 export default Document;

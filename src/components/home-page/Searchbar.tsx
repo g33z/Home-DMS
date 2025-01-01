@@ -3,7 +3,8 @@
 import type { FC } from 'react';
 
 interface SearchbarProps {
-    onChange?: (value: string) => void
+    value: string
+    onChange: (value: string) => void
     onSubmit?: (value: string) => void
 }
 
@@ -22,6 +23,7 @@ const Searchbar: FC<SearchbarProps> = (props) => {
                 placeholder='Search'
                 name='search'
                 className="bg-transparent rounded-lg border-2 border-gray-500 px-4 py-2 focus:border-violet-500 focus:ring-0 disabled:border-gray-700 disabled:text-gray-700 row-start-1 col-start-1 col-span-2"
+                value={props.value }
                 onChange={ e => props.onChange?.(e.target.value) }
             />
             <button

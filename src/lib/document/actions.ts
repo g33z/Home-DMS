@@ -1,24 +1,26 @@
 'use server'
 
-import { eq, inArray } from "drizzle-orm"
+import { eq, relations } from "drizzle-orm"
 import { db } from "../db"
 import { documentTable, documentToTagTable, pageTable, tagTable } from "../db/schema"
 import supabase from "../supabase/client"
 import { throwOnError } from "../supabase/utils"
 import { CHANNEL, DOCUMENT } from "../supabase/realtime"
 
+interface Tag {
+    id: number
+    keyword: string
+}
+
 export interface DocumentPreview {
     id: number,
-    tagKeywords: string[],
+    tags: Tag[],
     thumbnail: string
 }
 
 export interface DocumentDetails {
     id: number,
-    tags: {
-        id: number,
-        keyword: string
-    }[],
+    tags: Tag[],
     pages: string[]
 }
 
@@ -58,7 +60,10 @@ export async function getDocumentPreviews(): Promise<DocumentPreview[]> {
     
     return documents.map(document => ({
         id: document.id,
-        tagKeywords: document.documentsToTag.map(({ tag }) => tag.keyword),
+        tags: document.documentsToTag.map(relation => ({
+            id: relation.tagId,
+            keyword: relation.tag.keyword
+        })),
         thumbnail: urls
             .find(u => u.path === document.pages[0]?.storagePath)!
             .signedUrl
@@ -87,10 +92,13 @@ export async function getDocumentPreview(id: number): Promise<DocumentPreview | 
 
     return {
         id: document.id,
-        tagKeywords: document.documentsToTag.map(({ tag }) => tag.keyword),
+        tags: document.documentsToTag.map(relation => ({
+            id: relation.tagId,
+            keyword: relation.tag.keyword
+        })),
         thumbnail: await supabase.storage
             .from('documents')
-            .createSignedUrl(document.pages[0]!.storagePath, 60)
+            .createSignedUrl(document.pages[0]!.storagePath, 60 * 60 * 24)
             .then(throwOnError)
             .then(u => u.signedUrl)
     }

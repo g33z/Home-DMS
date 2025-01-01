@@ -47,7 +47,8 @@ const TagInput: FC<TagInputProps> = (props) => {
                         <li key={ tag.id }>
                             <Tag
                                 keyword={ tag.keyword }
-                                onDelete={ () => props.onTagsChange(oldTags => oldTags.filter(({id}) => id !== tag.id)) }
+                                onClick={ () => props.onTagsChange(oldTags => oldTags.filter(({id}) => id !== tag.id)) }
+                                deletable
                             />
                         </li>
                     )}
