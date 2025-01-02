@@ -10,7 +10,7 @@ interface SearchbarProps {
 
 const Searchbar: FC<SearchbarProps> = (props) => {
     
-    return (
+    return (<>
         <form 
             className="grid grid-cols-[1fr_2.6rem] grid-rows-1 items-center grow text-white"
             onSubmit={ e => {
@@ -31,7 +31,7 @@ const Searchbar: FC<SearchbarProps> = (props) => {
             >
             </button>
         </form>
-    );
+    </>);
 };
 
 export default Searchbar;

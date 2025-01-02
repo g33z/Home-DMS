@@ -1,8 +1,10 @@
 import type { FC } from 'react';
 import { Link } from 'waku';
-import { getDocumentDetails } from '../../lib/document/actions';
+import { getDocumentDetails, removeDocument } from '../../lib/document/actions';
 import ErrorScreen from '../../components/ErrorScreen';
 import Tag from '../../components/Tag';
+import Menu, { MenuOptions } from '../../components/detail-view/Menu';
+import DetailView from '../../components/detail-view/DetailView';
 
 interface DocumentDetailsProps {
     id: string
@@ -20,35 +22,8 @@ const DocumentDetails: FC<DocumentDetailsProps> = async (props) => {
     if(document === undefined) return (
         <ErrorScreen message='Document not found!'/>
     );
-    
-    return (
-        <div className='bg-gray-900 text-white grid grid-rows-[auto_1fr] h-screen'>
-            <h2 className='grid grid-cols-[1fr_auto] items-center text-xl bg-gray-700 text-gray-300'>
-                <span className='ml-6'>View Document Details</span>
-                <Link to='/' className="flex">
-                    <span className='iconify lucide--x m-6'></span>
-                </Link>
-            </h2>
-            <div className='overflow-y-auto'>
-                <section className='m-2'>
-                    <h3 className='text-lg font-bold text-gray-300'>Tags</h3>
-                    <div className='flex gap-1 m-2 flex-wrap pb-2'>
-                        { document.tags.map(tag =>
-                            <Tag keyword={ tag.keyword } key={ tag.id }/>
-                        )}
-                    </div>
-                </section>
-                <section className='m-2'>
-                    <h3 className='text-lg font-bold text-gray-300'>Pages</h3>
-                    <div className='flex flex-col gap-3 m-2'>
-                        { document.pages.map(pageUrl =>
-                            <img key={ pageUrl } src={ pageUrl }/>
-                        ) }
-                    </div>
-                </section>
-            </div>
-        </div>
-    );
+
+    return <DetailView document={ document }/>;
 };
 
 export default DocumentDetails;

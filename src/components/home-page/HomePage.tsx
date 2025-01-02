@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FC } from 'react';
+import { useCallback, useState, type FC } from 'react';
 import { DocumentPreview } from '../../lib/document/actions';
 import GoToNew from './GoToNew';
 import Documents from './Documents';
