@@ -17,7 +17,8 @@
     "@uppy/drag-drop": "^4.0.5",
     "@zag-js/dialog": "^0.78.3",
     "@zag-js/editable": "^0.78.3",
-    "@zag-js/react": "^0.78.3",
+    "@zag-js/menu": "^0.79.3",
+    "@zag-js/react": "^0.79.3",
     "drizzle-orm": "^0.38.2",
     "postgres": "^3.4.5",
     "react": "19.0.0",
@@ -26,7 +27,7 @@
     "react-textarea-autosize": "^8.5.6",
     "server-only": "^0.0.1",
     "tailwind-merge": "^2.5.5",
-    "waku": "https://pkg.csb.dev/dai-shi/waku/commit/9dd82a94/waku"
+    "waku": "^0.21.12"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.19",
@@ -34,7 +35,9 @@
     "@types/node": "^22.10.2",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "10.4.20",
+    "babel-plugin-react-compiler": "^19.0.0-beta-55955c9-20241229",
     "dotenv": "^16.4.7",
     "drizzle-kit": "^0.30.1",
     "ora": "^8.1.1",
