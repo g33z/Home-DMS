@@ -14,7 +14,7 @@ interface UploadFormProps {
 }
 
 const UploadForm: FC<UploadFormProps> = (props) => {
-    const [tags, setTags] = useState<{ id: string, keyword: string }[]>([]);
+    const [tags, setTags] = useState<string[]>([]);
 
     const addDoc = useMutation({
         mutationFn: async () => {
@@ -29,7 +29,7 @@ const UploadForm: FC<UploadFormProps> = (props) => {
             ));
 
             await addDocument({
-                tags: tags.map(t => t.keyword),
+                tags: tags,
                 pagePaths: pages.map(p => p.path)
             })
         },

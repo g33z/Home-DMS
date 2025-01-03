@@ -13,7 +13,7 @@ import { Readable } from 'stream';
 const IMAGES_PATH = 'test/data/images';
 const NUMBER_OF_DOCUMENTS = 200;
 
-let tagIdsInDb: number[] = []
+let tagsInDb: string[] = []
 
 if (!fs.existsSync(IMAGES_PATH)){
     fs.mkdirSync(IMAGES_PATH);
@@ -30,11 +30,11 @@ function getRandomImagePaths(){
     return filteredPaths;
 }
 
-function getRandomTagIds(){
-    const filteredTags = tagIdsInDb.filter(() => Math.random() < 0.01)
+function getRandomTagsFromDb(){
+    const filteredTags = tagsInDb.filter(() => Math.random() < 0.01)
 
     if(filteredTags.length === 0){
-        filteredTags.push(tagIdsInDb[0]!)
+        filteredTags.push(tagsInDb[0]!)
     }
 
     return filteredTags;
@@ -63,7 +63,7 @@ async function addAllTags() {
         .values(documentTags.map(keyword => ({ keyword })))
 }
 
-async function addTestDocument(tagIds: number[], pagePaths: string[]) {
+async function addTestDocument(tags: string[], pagePaths: string[]) {
     const pages = await Promise.all(pagePaths.map(pagePath => supabase.storage
         .from('documents')
         .upload(
@@ -89,9 +89,9 @@ async function addTestDocument(tagIds: number[], pagePaths: string[]) {
     
     await db
         .insert(documentToTagTable)
-        .values(tagIds.map(tagId => ({
+        .values(tags.map(tag => ({
             documentId: document!.id,
-            tagId
+            tag
         })))
 }
 
@@ -102,7 +102,7 @@ async function addTestDocuments() {
 
     for (let index = 0; index < NUMBER_OF_DOCUMENTS; index++) {
         spinner.text = log(index+1)
-        await addTestDocument(getRandomTagIds(), getRandomImagePaths());
+        await addTestDocument(getRandomTagsFromDb(), getRandomImagePaths());
     }
 
     spinner.succeed('Added all test data.')
@@ -134,9 +134,9 @@ async function main() {
     const tagSpinner = ora('Removing and re-adding tags...')
     await removeAllTags()
     await addAllTags()
-    tagIdsInDb = (await db.query.tagTable
-        .findMany({ columns: { id: true } }))
-        .map(t => t.id)
+    tagsInDb = (await db.query.tagTable
+        .findMany())
+        .map(t => t.keyword)
     tagSpinner.succeed('Re-added all tags.')
 
     const removeSpinner = ora('Removing all existing documents...')

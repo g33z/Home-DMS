@@ -28,8 +28,6 @@ export type MenuOptions = keyof typeof menuOptions;
 
 
 const Menu: FC<MenuProps<typeof menuOptions>> = (props) => {
-    const [editMode, setEditMode] = useState(false);
-
     const [state, send] = useMachine(
         menu.machine({ 
             id: 'detail-view-menu',
@@ -48,16 +46,9 @@ const Menu: FC<MenuProps<typeof menuOptions>> = (props) => {
     const api = menu.connect(state, send, normalizeProps)
 
     return (<>
-        { editMode
-            ?
-                <button className="flex">
-                    <span className='iconify lucide--save m-6'></span>
-                </button>
-            : 
-                <button {...api.getTriggerProps()} className="flex data-[state=open]:bg-gray-600">
-                    <span {...api.getIndicatorProps()} className='iconify lucide--more-vertical m-6'></span>
-                </button>
-        }
+        <button {...api.getTriggerProps()} className="flex data-[state=open]:bg-gray-600">
+            <span {...api.getIndicatorProps()} className='iconify lucide--more-vertical m-6'></span>
+        </button>
         <Portal>
             <div {...api.getPositionerProps()}>
                 <ul {...api.getContentProps()} className='hidden data-[state=open]:flex text-white py-4 px-5 text-xl rounded-lg rounded-tr-none bg-gray-600 flex-col gap-2'>

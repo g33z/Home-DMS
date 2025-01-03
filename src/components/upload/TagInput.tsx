@@ -1,14 +1,10 @@
 import { useRef, useState, type FC } from 'react';
 import Tag from '../Tag';
 
-interface TagItem {
-    id: string
-    keyword: string
-}
 
 interface TagInputProps {
-    tags: TagItem[]
-    onTagsChange: (change: (tags: TagItem[]) => TagItem[]) => void
+    tags: string[]
+    onTagsChange: (change: (tags: string[]) => string[]) => void
 }
 
 const TagInput: FC<TagInputProps> = (props) => {
@@ -19,13 +15,10 @@ const TagInput: FC<TagInputProps> = (props) => {
         <form
             onSubmit={ e => {
                 e.preventDefault();
-                props.onTagsChange(oldTags => [
-                    {
-                        id: crypto.randomUUID(),
-                        keyword: titleInput
-                    },
-                    ...oldTags.filter(({keyword}) => keyword !== titleInput)
-                ])
+                props.onTagsChange(oldTags => {
+                    if(oldTags.includes(titleInput)) return oldTags;
+                    return [...oldTags, titleInput];
+                })
                 formRef.current?.reset()
             } }
             ref={ formRef }
@@ -44,10 +37,10 @@ const TagInput: FC<TagInputProps> = (props) => {
             <div className='overflow-y-auto'>
                 <ul className='flex gap-1 mx-6 flex-wrap'>
                     { props.tags.map(tag =>
-                        <li key={ tag.id }>
+                        <li key={ tag }>
                             <Tag
-                                keyword={ tag.keyword }
-                                onClick={ () => props.onTagsChange(oldTags => oldTags.filter(({id}) => id !== tag.id)) }
+                                keyword={ tag }
+                                onClick={ () => props.onTagsChange(oldTags => oldTags.filter(t => t !== tag)) }
                                 deletable
                             />
                         </li>

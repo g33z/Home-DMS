@@ -20,18 +20,18 @@ const Document: FC<DocumentProps> = (props) => {
         <article className="bg-gray-800 rounded-xl relative overflow-hidden h-40 text-sm flex flex-col items-stretch">
             <Link to={ `/doc/${props.document.id}` } className="relative overflow-hidden">
                 <img loading='lazy' src={ props.document.thumbnail } className='p-5 pb-px object-cover min-h-[10rem]'/>     
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.4)] to-transparent mx-5 mb-0 mt-12"></div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[rgba(0,0,0,0.2)] to-transparent mx-5 h-3"></div>
             </Link>
             <div className="bg-gray-700 p-2 relative min-h-[4rem]">
                 <div className='flex flex-col gap-1'>
                     <span className='flex gap-1'>
                         { tags[0].map(tag =>
-                            <Tag key={ tag.id } keyword={ tag.keyword } onClick={ () => props.onTagClick(tag.keyword) }/>
+                            <Tag key={ tag } keyword={ tag } onClick={ () => props.onTagClick(tag) }/>
                         ) }
                     </span>
                     <span className='flex gap-1'>
                         { tags[1].map(tag =>
-                            <Tag key={ tag.id } keyword={ tag.keyword } onClick={ () => props.onTagClick(tag.keyword) }/>
+                            <Tag key={ tag } keyword={ tag } onClick={ () => props.onTagClick(tag) }/>
                         ) }
                     </span>
                 </div>

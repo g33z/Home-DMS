@@ -1,26 +1,21 @@
 'use server'
 
-import { eq, relations } from "drizzle-orm"
+import { and, eq, inArray } from "drizzle-orm"
 import { db } from "../db"
 import { documentTable, documentToTagTable, pageTable, tagTable } from "../db/schema"
 import supabase from "../supabase/client"
 import { throwOnError } from "../supabase/utils"
 import { CHANNEL, DOCUMENT } from "../supabase/realtime"
 
-interface Tag {
-    id: number
-    keyword: string
-}
-
 export interface DocumentPreview {
     id: number,
-    tags: Tag[],
+    tags: string[],
     thumbnail: string
 }
 
 export interface DocumentDetails {
     id: number,
-    tags: Tag[],
+    tags: string[],
     pages: string[]
 }
 
@@ -30,11 +25,7 @@ export async function getDocumentPreviews(): Promise<DocumentPreview[]> {
             pages: true,
             documentsToTag: {
                 with: {
-                    tag: {
-                        columns: {
-                            keyword: true
-                        }
-                    }
+                    tag: true
                 }
             }
         }
@@ -44,7 +35,7 @@ export async function getDocumentPreviews(): Promise<DocumentPreview[]> {
 
     const urls = await supabase.storage
         .from('documents')
-        .createSignedUrls(documents.map(d => d.pages[0]?.storagePath!), 60)
+        .createSignedUrls(documents.map(d => d.pages[0]?.storagePath!), 60 * 60 * 24)
         .then(throwOnError)
         .then(urls => {
             if(urls.every(url => url.error === null)) return urls;
@@ -60,10 +51,7 @@ export async function getDocumentPreviews(): Promise<DocumentPreview[]> {
     
     return documents.map(document => ({
         id: document.id,
-        tags: document.documentsToTag.map(relation => ({
-            id: relation.tagId,
-            keyword: relation.tag.keyword
-        })),
+        tags: document.documentsToTag.map(r => r.tag.keyword),
         thumbnail: urls
             .find(u => u.path === document.pages[0]?.storagePath)!
             .signedUrl
@@ -92,10 +80,7 @@ export async function getDocumentPreview(id: number): Promise<DocumentPreview | 
 
     return {
         id: document.id,
-        tags: document.documentsToTag.map(relation => ({
-            id: relation.tagId,
-            keyword: relation.tag.keyword
-        })),
+        tags: document.documentsToTag.map(r => r.tag.keyword),
         thumbnail: await supabase.storage
             .from('documents')
             .createSignedUrl(document.pages[0]!.storagePath, 60 * 60 * 24)
@@ -142,10 +127,7 @@ export async function getDocumentDetails(id: number): Promise<DocumentDetails | 
 
     return {
         id: document.id,
-        tags: document.documentsToTag.map(relation => ({
-            id: relation.tagId,
-            keyword: relation.tag.keyword
-        })),
+        tags: document.documentsToTag.map(r => r.tag.keyword),
         pages: document.pages
             .sort((a, b) => a.page - b.page)
             .map(page => urls
@@ -173,16 +155,15 @@ export async function addDocument(options: {
             documentId: document!.id
         })))
 
-    const tagIds = await db
+    await db
         .insert(tagTable)
         .values(options.tags.map(t => ({ keyword: t })))
-        .returning({ id: tagTable.id })
 
     await db
         .insert(documentToTagTable)
-        .values(tagIds.map(({ id }) => ({
+        .values(options.tags.map(tag => ({
             documentId: document!.id,
-            tagId: id
+            tag
         })))
 
     await supabase.realtime.channel(CHANNEL.DOCUMENT).send({
@@ -216,4 +197,45 @@ export async function removeDocument(id: number){
         event: DOCUMENT.DELETE,
         payload: { id }
     })
+}
+
+
+async function updateTags(document: DocumentDetails, tags: string[]){
+    const addedTags = tags.filter(t => !document.tags.includes(t))
+    const removedTags = document.tags.filter(t => !tags.includes(t))
+
+    if(addedTags.length > 0){
+        await db
+            .insert(tagTable)
+            .values(addedTags.map(t => ({ keyword: t })))
+            .onConflictDoNothing()
+    }
+
+    if(removedTags.length > 0){
+        await db
+            .delete(documentToTagTable)
+            .where(and(
+                eq(documentToTagTable.documentId, document.id),
+                inArray(documentToTagTable.tag, removedTags)
+            ));
+    }
+}
+
+export interface UpdateDocumentOptions {
+    tags?: string[],
+    pages?: string[]
+}
+
+export async function updateDocument(documentId: number, { tags, pages }: UpdateDocumentOptions) {
+    const document = await getDocumentDetails(documentId)
+
+    if(!document) throw new Error(`Document with id ${documentId} does not exist.`)
+
+    if(tags){
+        updateTags(document, tags)
+    }
+
+    if(pages){
+        // TODO
+    }
 }

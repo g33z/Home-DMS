@@ -48,7 +48,7 @@ const HomePage: FC<HomePageProps> = (props) => {
                         })
                     }
                 />
-				<GoToNew className='absolute bottom-8 right-8'/>
+				<GoToNew className='absolute bottom-8 right-8 shadow'/>
 			</main>
 		</div>
     );

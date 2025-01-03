@@ -8,17 +8,16 @@ export const documentTable = pgTable('documents', {
 })
 
 export const tagTable = pgTable('tags', {
-	id: bigserial({ mode: "number" }).primaryKey(),
-	keyword: text().notNull()
+	keyword: text().primaryKey()
 })
 
 export const documentToTagTable = pgTable('documentToTag', 
 	{
 		documentId: bigint({ mode: "number" }).references(() => documentTable.id).notNull(),
-		tagId: bigint({ mode: "number" }).references(() => tagTable.id).notNull()
+		tag: text().references(() => tagTable.keyword).notNull()
 	}, 
 	(t) => ([
-		primaryKey({ columns: [t.documentId, t.tagId] }) 
+		primaryKey({ columns: [t.documentId, t.tag] }) 
 	])
 );
 
@@ -51,7 +50,7 @@ export const documentToTagRelations = relations(documentToTagTable, ({ one }) =>
 		references: [documentTable.id]
 	}),
 	tag: one(tagTable, {
-		fields: [documentToTagTable.tagId],
-		references: [tagTable.id]
+		fields: [documentToTagTable.tag],
+		references: [tagTable.keyword]
 	})
 }))
