@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useState, type FC } from 'react';
 import { addDocument } from '../../lib/document/actions';
 import { twMerge } from 'tailwind-merge';
-import TagInput from './TagInput';
+import TagInput from '../TagInput';
 import supabase from '../../lib/supabase/client';
 import { throwOnError } from '../../lib/supabase/utils';
 
@@ -54,6 +54,8 @@ const UploadForm: FC<UploadFormProps> = (props) => {
             <TagInput
                 tags={ tags }
                 onTagsChange={ setTags }
+                editable
+                className='mx-6'
             />
             <button 
                 className='bg-emerald-500 rounded-lg text-xl p-2 flex gap-2 items-center justify-center mb-5 disabled:brightness-50 mt-auto mx-6'

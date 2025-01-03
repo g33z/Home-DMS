@@ -7,6 +7,7 @@ import Menu, { MenuOptions } from './Menu';
 import { DocumentDetails, removeDocument, updateDocument, UpdateDocumentOptions } from '../../lib/document/actions';
 import { useMutation } from '@tanstack/react-query';
 import EditActions from './EditActions';
+import TagInput from '../TagInput';
 
 interface DetailViewProps {
     document: DocumentDetails
@@ -51,11 +52,7 @@ const DetailView: FC<DetailViewProps> = (props) => {
         setTags(props.document.tags)
     }
 
-    function onTagClick(keyword: string){
-        if(!editMode) return;
-
-        setTags(tags => tags.filter(t => t !== keyword))
-    }
+    
     
     return (
         <div className='bg-gray-900 text-white grid grid-rows-[auto_1fr] h-screen'>
@@ -72,16 +69,12 @@ const DetailView: FC<DetailViewProps> = (props) => {
             <div className='overflow-y-auto'>
                 <section className='m-2'>
                     <h3 className='text-lg font-bold text-gray-300'>Tags</h3>
-                    <div className='flex gap-1 m-2 flex-wrap pb-2'>
-                        { tags.map(tag =>
-                            <Tag 
-                                key={ tag }
-                                keyword={ tag } 
-                                deletable={ editMode }
-                                onClick={ () => onTagClick(tag) }
-                            />
-                        )}
-                    </div>
+                    <TagInput 
+                        tags={ tags } 
+                        onTagsChange={ setTags } 
+                        editable={ editMode }
+                        className='m-2'
+                    />
                 </section>
                 <section className='m-2'>
                     <h3 className='text-lg font-bold text-gray-300'>Pages</h3>
