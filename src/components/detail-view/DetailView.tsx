@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FC } from 'react';
+import { Fragment, useState, type FC } from 'react';
 import { Link, useRouter_UNSTABLE as useRouter } from 'waku';
 import Tag from '../Tag';
 import Menu, { MenuOptions } from './Menu';
@@ -8,6 +8,8 @@ import { DocumentDetails, removeDocument, updateDocument, UpdateDocumentOptions 
 import { useMutation } from '@tanstack/react-query';
 import EditActions from './EditActions';
 import TagInput from '../TagInput';
+import Page from './Page';
+import AddPage from './AddPage';
 
 interface DetailViewProps {
     document: DocumentDetails
@@ -51,8 +53,6 @@ const DetailView: FC<DetailViewProps> = (props) => {
         setEditMode(false)
         setTags(props.document.tags)
     }
-
-    
     
     return (
         <div className='bg-gray-900 text-white grid grid-rows-[auto_1fr] h-screen'>
@@ -66,9 +66,9 @@ const DetailView: FC<DetailViewProps> = (props) => {
                     : <Menu onSelect={ onMenuSelect }/>
                 }
             </h2>
-            <div className='overflow-y-auto'>
-                <section className='m-2'>
-                    <h3 className='text-lg font-bold text-gray-300'>Tags</h3>
+            <div className='overflow-y-auto p-6 flex flex-col gap-4'>
+                <section>
+                    <h3 className='text-xl font-bold text-gray-300'>Tags</h3>
                     <TagInput 
                         tags={ tags } 
                         onTagsChange={ setTags } 
@@ -76,11 +76,24 @@ const DetailView: FC<DetailViewProps> = (props) => {
                         className='m-2'
                     />
                 </section>
-                <section className='m-2'>
-                    <h3 className='text-lg font-bold text-gray-300'>Pages</h3>
+                <section>
+                    <h3 className='text-xl font-bold text-gray-300'>Pages</h3>
                     <div className='flex flex-col gap-3 m-2'>
+                        { editMode &&
+                            <AddPage loading onClick={ () => {}}/>
+                        }
                         { pages.map(pageUrl =>
-                            <img key={ pageUrl } src={ pageUrl }/>
+                            <Fragment key={ pageUrl }>
+                                <Page 
+                                    src={ pageUrl } 
+                                    editable={ editMode }
+                                    onDelete={ () => {} }
+                                    deleteLoading
+                                />
+                                { editMode &&
+                                    <AddPage loading onClick={ () => {}}/>
+                                }
+                            </Fragment>
                         ) }
                     </div>
                 </section>

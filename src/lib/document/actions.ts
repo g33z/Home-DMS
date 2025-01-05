@@ -1,6 +1,6 @@
 'use server'
 
-import { and, eq, inArray } from "drizzle-orm"
+import { and, asc, eq, inArray } from "drizzle-orm"
 import { db } from "../db"
 import { documentTable, documentToTagTable, pageTable, tagTable } from "../db/schema"
 import supabase from "../supabase/client"
@@ -94,7 +94,9 @@ export async function getDocumentDetails(id: number): Promise<DocumentDetails | 
     const document = await db.query.documentTable.findFirst({
         where: eq(documentTable.id, id),
         with: {
-            pages: true,
+            pages: {
+                orderBy: [asc(pageTable.page)]
+            },
             documentsToTag: {
                 with: {
                     tag: {
@@ -200,7 +202,13 @@ export async function removeDocument(id: number){
 }
 
 
-async function updateTags(document: DocumentDetails, tags: string[]){
+async function updateTags(
+    document: {
+        tags: string[],
+        id: number
+    }, 
+    tags: string[]
+){
     const addedTags = tags.filter(t => !document.tags.includes(t))
     const removedTags = document.tags.filter(t => !tags.includes(t))
 
@@ -221,21 +229,96 @@ async function updateTags(document: DocumentDetails, tags: string[]){
     }
 }
 
+async function updatePages(
+    document: {
+        id: number,
+        pages: string[]
+    }, 
+    pages: Page[]
+) {
+    const resolvedPages = await Promise.all(pages
+        .map(async page => {
+            if(page.url !== undefined){
+                return page.url
+            }
+
+            return await supabase.storage
+                .from('documents')
+                .upload(
+                    crypto.randomUUID(), 
+                    page.file
+                )
+                .then(throwOnError)
+                .then(p => p.path)
+        })
+    )
+
+    const pageUrls = pages.filter(p => p.url !== undefined).map(p => p.url)
+
+    // deleting all pages and re-adding them with correct page numbers is easier than manual diffing
+    await db
+        .delete(pageTable)
+        .where(eq(pageTable.documentId, document.id))
+
+    await supabase.storage
+        .from('documents')
+        .remove(document.pages.filter(docP => !pageUrls.includes(docP)))
+    
+    await db
+        .insert(pageTable)
+        .values(resolvedPages.map((path, index) => ({
+            documentId: document.id,
+            storagePath: path,
+            page: index
+        })))
+}
+
+type Page = 
+    { url: string, file?: undefined } | 
+    { url?: undefined, file: File }
+
 export interface UpdateDocumentOptions {
     tags?: string[],
-    pages?: string[]
+    pages?: Page[]
 }
 
 export async function updateDocument(documentId: number, { tags, pages }: UpdateDocumentOptions) {
-    const document = await getDocumentDetails(documentId)
+    const document = await db.query.documentTable.findFirst({
+        where: eq(documentTable.id, documentId),
+        with: {
+            pages: {
+                orderBy: [asc(pageTable.page)]
+            },
+            documentsToTag: {
+                with: {
+                    tag: {
+                        columns: {
+                            keyword: true
+                        }
+                    }
+                }
+            }
+        }
+    })
 
     if(!document) throw new Error(`Document with id ${documentId} does not exist.`)
 
+    document.pages
+
     if(tags){
-        updateTags(document, tags)
+        updateTags(
+            { 
+                id: document.id
+                tags
+            }, 
+            tags
+        )
     }
 
     if(pages){
-        // TODO
+        updatePages({
+            id: document.id,
+            pages: document.pages.map(p => p.storagePath)
+        })
     }
 }
