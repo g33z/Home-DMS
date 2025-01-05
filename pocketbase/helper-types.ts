@@ -1,0 +1,1 @@
+export type CreateRecord<T extends Record<string, unknown>> = Omit<T, 'id'> & { id?: string }
