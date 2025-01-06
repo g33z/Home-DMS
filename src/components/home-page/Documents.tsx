@@ -2,11 +2,10 @@
 
 import { type FC } from 'react';
 import Document from './document/Document';
-import { DocumentPreview } from '../../lib/document/actions';
-import { DocumentsRecord } from '../../lib/pocketbase/pb-types';
+import { ExpandedDoc } from './HomePage';
 
 interface DocumentsProps {
-    documents: DocumentsRecord[]
+    documents: ExpandedDoc[]
     onTagClick: (keyword: string) => void
 }
 

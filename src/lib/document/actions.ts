@@ -305,20 +305,20 @@ export async function updateDocument(documentId: number, { tags, pages }: Update
 
     document.pages
 
-    if(tags){
-        updateTags(
-            { 
-                id: document.id
-                tags
-            }, 
-            tags
-        )
-    }
+    // if(tags){
+    //     updateTags(
+    //         { 
+    //             id: document.id
+    //             tags
+    //         }, 
+    //         tags
+    //     )
+    // }
 
-    if(pages){
-        updatePages({
-            id: document.id,
-            pages: document.pages.map(p => p.storagePath)
-        })
-    }
+    // if(pages){
+    //     updatePages({
+    //         id: document.id,
+    //         pages: document.pages.map(p => p.storagePath)
+    //     })
+    // }
 }

@@ -1,17 +1,25 @@
 'use client'
 
-import { useCallback, useState, type FC } from 'react';
-import { DocumentPreview } from '../../lib/document/actions';
+import { useState, type FC } from 'react';
 import GoToNew from './GoToNew';
 import Documents from './Documents';
 import Icon from '../../images/Icon.svg';
 import Searchbar from './Searchbar';
-import { useDocuments } from '../../lib/document/hooks';
 import { useQuery } from '@tanstack/react-query';
 import pb from '../../lib/pocketbase';
+import { Expanded } from '../../lib/pocketbase/helper-types';
+import { DocumentsResponse, PagesRecord, TagsRecord } from '../../lib/pocketbase/pb-types';
 
 interface HomePageProps {
 }
+
+export type ExpandedDoc = Expanded<
+    DocumentsResponse<unknown>,
+    {
+        pages: PagesRecord[],
+        tags: TagsRecord[]
+    }
+>
 
 const HomePage: FC<HomePageProps> = (props) => {
     const [searchbarValue, setSearchbarValue] = useState('');
@@ -20,7 +28,7 @@ const HomePage: FC<HomePageProps> = (props) => {
     const documents = useQuery({ 
         queryFn: () => pb
             .collection('documents')
-            .getFullList(),
+            .getFullList<ExpandedDoc>({ expand: 'pages,tags' }),
         queryKey: ['file-list']
     });
 
@@ -44,7 +52,7 @@ const HomePage: FC<HomePageProps> = (props) => {
 			<main className='overflow-y-auto'>
 				{ documents.data && 
                     <Documents 
-                        documents={ documents } 
+                        documents={ documents.data } 
                         onTagClick={ keyword => 
                             setSearchbarValue(v => {
                                 const query = v
