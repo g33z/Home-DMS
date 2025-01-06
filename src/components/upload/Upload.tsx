@@ -37,7 +37,7 @@ const Upload: FC<UploadProps> = (props) => {
 	}, []);
 
 	useEffect(() => {
-		if(history.state === null) return; // is the page loaded by user or by link
+		if(history.state === null) return; // is the page loaded by user or by link - TODO: Detection does not work
 		fileInputRef.current?.click();
 	}, []);
 

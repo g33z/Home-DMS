@@ -7,21 +7,10 @@ import Icon from '../../images/Icon.svg';
 import Searchbar from './Searchbar';
 import { useQuery } from '@tanstack/react-query';
 import pb from '../../lib/pocketbase';
-import { Expanded } from '../../lib/pocketbase/helper-types';
-import { DocumentsResponse, PagesRecord, TagsRecord } from '../../lib/pocketbase/pb-types';
+import { ExpandedDoc } from '../../lib/document/service';
 
-interface HomePageProps {
-}
 
-export type ExpandedDoc = Expanded<
-    DocumentsResponse<unknown>,
-    {
-        pages: PagesRecord[],
-        tags: TagsRecord[]
-    }
->
-
-const HomePage: FC<HomePageProps> = (props) => {
+const HomePage: FC = (props) => {
     const [searchbarValue, setSearchbarValue] = useState('');
     const [search, setSearch] = useState('');
 
@@ -29,7 +18,7 @@ const HomePage: FC<HomePageProps> = (props) => {
         queryFn: () => pb
             .collection('documents')
             .getFullList<ExpandedDoc>({ expand: 'pages,tags' }),
-        queryKey: ['file-list']
+        queryKey: ['documents']
     });
 
     function onSearch(query: string){

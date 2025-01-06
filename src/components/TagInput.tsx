@@ -1,11 +1,11 @@
 import { useRef, useState, type FC } from 'react';
 import Tag from './Tag';
 import { twMerge } from 'tailwind-merge';
-
+import type { TagType } from './detail-view/DetailView'
 
 interface TagInputProps {
-    tags: string[]
-    onTagsChange: (change: (tags: string[]) => string[]) => void
+    tags: TagType[]
+    onTagsChange: (change: (tags: TagType[]) => TagType[]) => void
     editable?: boolean
     className?: string
 }
@@ -14,10 +14,8 @@ const TagInput: FC<TagInputProps> = (props) => {
     const [titleInput, setTitleInput] = useState('');
     const formRef = useRef<HTMLFormElement>(null);
 
-    function onTagClick(keyword: string){
-        if(!props.editable) return;
-
-        props.onTagsChange(oldTags => oldTags.filter(t => t !== keyword))
+    function removeTag(keyword: string){
+        props.onTagsChange(oldTags => oldTags.filter(t => t.keyword !== keyword))
     }
     
     return (
@@ -25,8 +23,8 @@ const TagInput: FC<TagInputProps> = (props) => {
             onSubmit={ e => {
                 e.preventDefault();
                 props.onTagsChange(oldTags => {
-                    if(oldTags.includes(titleInput)) return oldTags;
-                    return [...oldTags, titleInput];
+                    if(oldTags.some(t => t.keyword === titleInput)) return oldTags;
+                    return [...oldTags, { keyword: titleInput }];
                 })
                 formRef.current?.reset()
             } }
@@ -48,10 +46,10 @@ const TagInput: FC<TagInputProps> = (props) => {
             <div className='overflow-y-auto'>
                 <ul className='flex gap-1 flex-wrap'>
                     { props.tags.map(tag =>
-                        <li key={ tag }>
+                        <li key={ tag.keyword }>
                             <Tag
-                                keyword={ tag }
-                                onClick={ () => onTagClick(tag) }
+                                keyword={ tag.keyword }
+                                onClick={ props.editable ? () => removeTag(tag.keyword) : undefined }
                                 deletable={ props.editable ?? false }
                             />
                         </li>

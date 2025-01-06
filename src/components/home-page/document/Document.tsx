@@ -21,11 +21,12 @@ const Document: FC<DocumentProps> = (props) => {
 
     return (<>
         <article className="bg-gray-800 rounded-xl relative overflow-hidden h-40 text-sm flex flex-col items-stretch">
-            <Link to={ `/doc/${props.document.id}` } className="relative overflow-hidden">
+            <Link to={ `/doc?id=${props.document.id}` } className="relative overflow-hidden">
                 <img 
                     loading='lazy' 
                     src={ `${import.meta.env.WAKU_PUBLIC_PB_URL}/api/files/pages/${thumbnailPage.id}/${thumbnailPage.file}?thumb=150x0` } 
                     className='p-5 pb-px object-cover min-h-[10rem] w-full'
+                    width='150'
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[rgba(0,0,0,0.2)] to-transparent mx-5 h-3"></div>
             </Link>

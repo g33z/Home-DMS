@@ -20,6 +20,6 @@ export default NewUpload;
 
 export const getConfig = async () => {
 	return {
-		render: 'dynamic',
+		render: 'static',
 	} as const;
 };
