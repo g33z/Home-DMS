@@ -3,9 +3,10 @@
 import { type FC } from 'react';
 import Document from './document/Document';
 import { DocumentPreview } from '../../lib/document/actions';
+import { DocumentsRecord } from '../../lib/pocketbase/pb-types';
 
 interface DocumentsProps {
-    documents: DocumentPreview[]
+    documents: DocumentsRecord[]
     onTagClick: (keyword: string) => void
 }
 

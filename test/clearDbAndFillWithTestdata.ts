@@ -6,8 +6,8 @@ import { bucketUrl, imageNames } from './data/imageUrls';
 import { finished } from 'stream/promises';
 import { Readable } from 'stream';
 import PocketBase from 'pocketbase'
-import { Collections, TagsRecord, TypedPocketBase } from '../pocketbase/pb-types';
-import { CreateRecord } from '../pocketbase/helper-types';
+import { Collections, TagsRecord, TypedPocketBase } from '../src/lib/pocketbase/pb-types';
+import { CreateRecord } from '../src/lib/pocketbase/helper-types';
 
 const IMAGES_PATH = 'test/data/images';
 const NUMBER_OF_DOCUMENTS = 200;
@@ -52,26 +52,31 @@ async function downloadTestImages() {
 }
 
 async function pbClear() {
-    const spinner = ora('Deleting Tags and Documents...')
+    const spinner = ora('Deleting all Records...')
     const pbDocs = await pb.collection('documents').getFullList({ fields: 'id' });
     const pbTags = await pb.collection('tags').getFullList({ fields: 'id' })
+    const pbPages = await pb.collection('pages').getFullList({ fields: 'id' })
 
-    const logDoc = (doc: number) => `Deleting Document ${doc}/${pbDocs.length}`
+    // deleting documents
+    await Promise.all(pbDocs.map(doc => pb.collection('documents').delete(doc.id)))
 
-    await Promise.all(pbTags.map(tag => pb
-        .collection(Collections.Tags)
-        .delete(tag.id)
-    ))
+    // deleting tags
+    await Promise.all(pbTags.map(tag => pb.collection('tags').delete(tag.id)))
 
-    for (let index = 0; index < pbDocs.length; index++) {
-        spinner.text = logDoc(index+1)
-        await pb.collection(Collections.Documents).delete(pbDocs[index]!.id)
+    // deleting pages
+    const logPage = (page: number) => `Deleting Pages ${page}/${pbPages.length}`
+    for (let index = 0; index < pbPages.length; index++) {
+        spinner.text = logPage(index+1)
+        await pb.collection('pages').delete(pbPages[index]!.id)
     }
-
-    spinner.succeed('Deleted all Tags and Documents.')
+    spinner.succeed('Deleted all Records.')
 }
 
 async function pbFill() {
+    // fill tags
+
+    const tagSpinner = ora('Filling Tags...')
+
     const tagBatch = pb.createBatch()
     documentTags.forEach(tag => tagBatch
         .collection(Collections.Tags)
@@ -81,18 +86,47 @@ async function pbFill() {
     )
     await tagBatch.send()
 
-    const newTagIds = (await pb.collection('tags').getFullList({ fields: 'id' })).map(r => r.id)
+    tagSpinner.succeed('Filled Tags.')
 
-    const log = (doc: number) => `Uploading Document ${doc}/${NUMBER_OF_DOCUMENTS}`
+
+    // fill pages
+
+    const log = (doc: number) => `Uploading Page ${doc}/${NUMBER_OF_DOCUMENTS}`
     const spinner = ora(log(1)).start();
-    for (let index = 0; index < NUMBER_OF_DOCUMENTS; index++) {
+    
+    const imagePaths = fs.readdirSync(IMAGES_PATH)
+    
+    for (let index = 0; index < imagePaths.length; index++) {
         spinner.text = log(index+1)
-        await pb.collection('documents').create({
-            pages: getRandomImageFiles(),
+
+        await pb.collection('pages').create({
+            file: new File(
+                [fs.readFileSync(`${IMAGES_PATH}/${imagePaths[index]}`)],
+                imagePaths[index]!,
+            )
+        })
+    }
+
+    spinner.succeed('Uploaded all pages.')
+
+
+    // fill documents
+
+    const docSpinner = ora('Filling Documents...')
+
+    const newTagIds = (await pb.collection('tags').getFullList({ fields: 'id' })).map(r => r.id)
+    const newPageIds = (await pb.collection('pages').getFullList({ fields: 'id' })).map(r => r.id)
+
+    const docBatch = pb.createBatch()
+    for (let index = 0; index < NUMBER_OF_DOCUMENTS; index++) {
+        docBatch.collection('documents').create({
+            pages: newPageIds.filter(() => Math.random() < 0.08),
             tags: newTagIds.filter(() => Math.random() < 0.01)
         })
     }
-    spinner.succeed('Added all test data.')
+    await docBatch.send()
+
+    docSpinner.succeed('Filled Documents.')
 }
 
 async function main() {

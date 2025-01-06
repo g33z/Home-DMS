@@ -7,16 +7,22 @@ import Documents from './Documents';
 import Icon from '../../images/Icon.svg';
 import Searchbar from './Searchbar';
 import { useDocuments } from '../../lib/document/hooks';
+import { useQuery } from '@tanstack/react-query';
+import pb from '../../lib/pocketbase';
 
 interface HomePageProps {
-    documents: DocumentPreview[]
 }
 
 const HomePage: FC<HomePageProps> = (props) => {
     const [searchbarValue, setSearchbarValue] = useState('');
     const [search, setSearch] = useState('');
 
-    const documents = useDocuments(props.documents, search);
+    const documents = useQuery({ 
+        queryFn: () => pb
+            .collection('documents')
+            .getFullList(),
+        queryKey: ['file-list']
+    });
 
     function onSearch(query: string){
         setSearchbarValue(query)
@@ -36,18 +42,20 @@ const HomePage: FC<HomePageProps> = (props) => {
 				<Searchbar value={ searchbarValue } onChange={ onSearch } onSubmit={ setSearch }/>
 			</header>
 			<main className='overflow-y-auto'>
-				<Documents 
-                    documents={ documents } 
-                    onTagClick={ keyword => 
-                        setSearchbarValue(v => {
-                            const query = v
-                                ? `${searchbarValue} ${keyword}`
-                                : keyword;
-                            setSearch(query);
-                            return query;
-                        })
-                    }
-                />
+				{ documents.data && 
+                    <Documents 
+                        documents={ documents } 
+                        onTagClick={ keyword => 
+                            setSearchbarValue(v => {
+                                const query = v
+                                    ? `${searchbarValue} ${keyword}`
+                                    : keyword;
+                                setSearch(query);
+                                return query;
+                            })
+                        }
+                    />
+                }
 				<GoToNew className='absolute bottom-8 right-8 shadow'/>
 			</main>
 		</div>
