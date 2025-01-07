@@ -1,8 +1,8 @@
 'use client'
 
 import { type FC } from 'react';
-import Document from './document/Document';
-import { ExpandedDoc } from './HomePage';
+import Document from './Document';
+import { ExpandedDoc } from '../../lib/document/service';
 
 interface DocumentsProps {
     documents: ExpandedDoc[]

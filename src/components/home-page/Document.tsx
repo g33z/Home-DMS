@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Link } from 'waku';
-import Tag from '../../Tag';
-import { ExpandedDoc } from '../../../lib/document/service';
+import Tag from '../Tag';
+import { ExpandedDoc } from '../../lib/document/service';
 
 interface DocumentProps {
     document: ExpandedDoc
