@@ -69,6 +69,7 @@ export async function deleteDocument(document: ExpandedDoc) {
     }
 }
 
+
 export async function addDocument(tags: TagType[], pages: File[]) {
     // add tags
     const tagBatch = pb.createBatch()
@@ -101,4 +102,16 @@ export async function addDocument(tags: TagType[], pages: File[]) {
             pages: addedPageIds,
             tags: addedTagIds
         })
+}
+
+export function filterDocuments(documents: ExpandedDoc[], searchQuery: string){
+    if(!searchQuery) return documents
+
+    return documents.filter(doc => 
+        searchQuery.trim().toLowerCase().split(' ').every(query => 
+            doc.expand.tags.some(({ keyword }) => 
+                keyword.toLowerCase() === query
+            )
+        )
+    );
 }
