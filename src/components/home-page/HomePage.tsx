@@ -1,22 +1,37 @@
 'use client'
 
-import { useCallback, useState, type FC } from 'react';
-import { DocumentPreview } from '../../lib/document/actions';
+import { useEffect, useState, type FC } from 'react';
 import GoToNew from './GoToNew';
 import Documents from './Documents';
 import Icon from '../../images/Icon.svg';
 import Searchbar from './Searchbar';
-import { useDocuments } from '../../lib/document/hooks';
+import { useQuery } from '@tanstack/react-query';
+import pb from '../../lib/pocketbase';
+import { ExpandedDoc, filterDocuments } from '../../lib/document/service';
 
-interface HomePageProps {
-    documents: DocumentPreview[]
-}
 
-const HomePage: FC<HomePageProps> = (props) => {
+const HomePage: FC = (props) => {
     const [searchbarValue, setSearchbarValue] = useState('');
     const [search, setSearch] = useState('');
 
-    const documents = useDocuments(props.documents, search);
+    const documents = useQuery({ 
+        queryFn: () => pb
+            .collection('documents')
+            .getFullList<ExpandedDoc>({ 
+                expand: 'pages,tags', 
+                sort: '-uploadedAt'
+            }),
+        queryKey: ['documents', search]
+    });
+    const [filteredDocuments, setFilteredDocuments] = useState(documents.data);
+
+    useEffect(() => {
+        if(documents.data === undefined){
+            setFilteredDocuments(undefined)
+            return
+        }
+        setFilteredDocuments(filterDocuments(documents.data, search))
+    }, [documents, search]);
 
     function onSearch(query: string){
         setSearchbarValue(query)
@@ -36,18 +51,20 @@ const HomePage: FC<HomePageProps> = (props) => {
 				<Searchbar value={ searchbarValue } onChange={ onSearch } onSubmit={ setSearch }/>
 			</header>
 			<main className='overflow-y-auto'>
-				<Documents 
-                    documents={ documents } 
-                    onTagClick={ keyword => 
-                        setSearchbarValue(v => {
-                            const query = v
-                                ? `${searchbarValue} ${keyword}`
-                                : keyword;
-                            setSearch(query);
-                            return query;
-                        })
-                    }
-                />
+				{ filteredDocuments && 
+                    <Documents
+                        documents={ filteredDocuments } 
+                        onTagClick={ keyword => 
+                            setSearchbarValue(v => {
+                                const query = v
+                                    ? `${searchbarValue} ${keyword}`
+                                    : keyword;
+                                setSearch(query);
+                                return query;
+                            })
+                        }
+                    />
+                }
 				<GoToNew className='absolute bottom-8 right-8 shadow'/>
 			</main>
 		</div>

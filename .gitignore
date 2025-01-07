@@ -8,3 +8,7 @@ dist
 *.gen.ts
 test/data/images
 .vscode
+pb-types.ts
+pocketbase.exe
+pb_data
+*.gen.ts

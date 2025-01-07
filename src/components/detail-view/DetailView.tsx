@@ -1,35 +1,61 @@
 'use client'
 
-import { Fragment, useState, type FC } from 'react';
+import { Fragment, useEffect, useState, type FC } from 'react';
 import { Link, useRouter_UNSTABLE as useRouter } from 'waku';
-import Tag from '../Tag';
 import Menu, { MenuOptions } from './Menu';
-import { DocumentDetails, removeDocument, updateDocument, UpdateDocumentOptions } from '../../lib/document/actions';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import EditActions from './EditActions';
 import TagInput from '../TagInput';
 import Page from './Page';
 import AddPage from './AddPage';
+import { PagesRecord } from '../../lib/pocketbase/pb-types';
+import { deleteDocument, ExpandedDoc, PageType, updateDocument, UpdateDocumentOptions } from '../../lib/document/service';
+
+
+function mapExpandedPages(pages: PagesRecord[]): UpdateDocumentOptions['pages'] {
+    return pages.map(page => ({
+        id: page.id,
+        url: `${import.meta.env.WAKU_PUBLIC_PB_URL}/api/files/pages/${page.id}/${page.file}`
+    }))
+}
 
 interface DetailViewProps {
-    document: DocumentDetails
+    document: ExpandedDoc
 }
 
 const DetailView: FC<DetailViewProps> = (props) => {
-    const [tags, setTags] = useState(props.document.tags);
-    const [pages, setPages] = useState(props.document.pages);
+    const [tags, setTags] = useState<UpdateDocumentOptions['tags']>(props.document.expand.tags);
+    const [pages, setPages] = useState(mapExpandedPages(props.document.expand.pages));
     const [editMode, setEditMode] = useState(false);
+
+    const queryClient = useQueryClient()
     const router = useRouter()
 
+    console.log('pages', pages)
+
+    useEffect(() => {
+        setTags(props.document.expand.tags)
+    }, [props.document.expand.tags]);
+
+    useEffect(() => {
+        setPages(mapExpandedPages(props.document.expand.pages))
+    }, [props.document.expand.pages]);
+
     const deleteMutation = useMutation({
-        mutationFn: () => removeDocument(props.document.id),
+        mutationFn: async () => deleteDocument(props.document),
         onSuccess: () => router.push('/')
     })
 
     const updateMutation = useMutation({
         mutationFn: (options: UpdateDocumentOptions) => 
-            updateDocument(props.document.id, options),
-        onSuccess: () => setEditMode(false)
+            updateDocument(props.document, options),
+        onSuccess: (data) => {
+            setEditMode(false);
+            queryClient.setQueryData(
+                ['documents', 'record', props.document.id],
+                data
+            )
+        }
     })
 
     function onMenuSelect(selected: MenuOptions){
@@ -45,13 +71,28 @@ const DetailView: FC<DetailViewProps> = (props) => {
 
     function onEditSave(){
         updateMutation.mutate({
-            tags
+            tags,
+            pages
         })
     }
 
     function onEditCancel(){
         setEditMode(false)
-        setTags(props.document.tags)
+        setTags(props.document.expand.tags)
+        setPages(mapExpandedPages(props.document.expand.pages))
+    }
+
+    function addPages(files: File[], index: number){
+        setPages(pages => 
+            pages.toSpliced(index, 0, ...files.map(file => ({
+                url: URL.createObjectURL(file),
+                file: file
+            }) satisfies PageType))
+        )
+    }
+
+    function removePage(index: number){
+        setPages(pages => pages.toSpliced(index, 1))
     }
     
     return (
@@ -80,18 +121,17 @@ const DetailView: FC<DetailViewProps> = (props) => {
                     <h3 className='text-xl font-bold text-gray-300'>Pages</h3>
                     <div className='flex flex-col gap-3 m-2'>
                         { editMode &&
-                            <AddPage loading onClick={ () => {}}/>
+                            <AddPage onAdd={ files => addPages(files, 0) }/>
                         }
-                        { pages.map(pageUrl =>
-                            <Fragment key={ pageUrl }>
+                        { pages.map((page, index) =>
+                            <Fragment key={ page.url }>
                                 <Page 
-                                    src={ pageUrl } 
-                                    editable={ editMode }
-                                    onDelete={ () => {} }
-                                    deleteLoading
+                                    src={ page.url }
+                                    deletable={ editMode }
+                                    onDelete={ () => removePage(index) }
                                 />
                                 { editMode &&
-                                    <AddPage loading onClick={ () => {}}/>
+                                    <AddPage onAdd={ files => addPages(files, index+1) }/>
                                 }
                             </Fragment>
                         ) }

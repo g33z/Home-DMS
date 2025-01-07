@@ -2,11 +2,9 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useState, type FC } from 'react';
-import { addDocument } from '../../lib/document/actions';
 import { twMerge } from 'tailwind-merge';
 import TagInput from '../TagInput';
-import supabase from '../../lib/supabase/client';
-import { throwOnError } from '../../lib/supabase/utils';
+import { addDocument, TagType } from '../../lib/document/service';
 
 interface UploadFormProps {
     files: File[]
@@ -14,31 +12,19 @@ interface UploadFormProps {
 }
 
 const UploadForm: FC<UploadFormProps> = (props) => {
-    const [tags, setTags] = useState<string[]>([]);
+    const [tags, setTags] = useState<TagType[]>([]);
 
     const addDoc = useMutation({
-        mutationFn: async () => {
-            const pages = await Promise.all(props.files.map(page => supabase.storage
-                .from('documents')
-                .upload(
-                    crypto.randomUUID(), 
-                    page, 
-                    { cacheControl: '31536000' }
-                )
-                .then(throwOnError)
-            ));
-
-            await addDocument({
-                tags: tags,
-                pagePaths: pages.map(p => p.path)
-            })
-        },
+        mutationFn: () => addDocument(
+            tags,
+            props.files
+        ),
         onSuccess: () => props.onUploaded?.()
     });
     
     return (
         <div className='my-6 flex flex-col gap-6 h-full min-h-0 text-white'>
-            <div className='flex overflow-x-auto snap-x snap-proximity scroll-p-3 last:pr-6 pb-4 min-h-96'>
+            <div className='flex overflow-x-auto snap-x snap-proximity scroll-p-3 pr-6 pb-4 min-h-96'>
                 { props.files.map(file =>
                     <div 
                         className='snap-start shrink-0 w-[calc(100vw-3rem)] pl-6'

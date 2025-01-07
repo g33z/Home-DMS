@@ -1,11 +1,11 @@
 'use client'
 
 import { type FC } from 'react';
-import Document from './document/Document';
-import { DocumentPreview } from '../../lib/document/actions';
+import Document from './Document';
+import { ExpandedDoc } from '../../lib/document/service';
 
 interface DocumentsProps {
-    documents: DocumentPreview[]
+    documents: ExpandedDoc[]
     onTagClick: (keyword: string) => void
 }
 
