@@ -2,7 +2,7 @@
 
 import * as menu from "@zag-js/menu"
 import { useMachine, normalizeProps, Portal } from "@zag-js/react"
-import { useState, type FC } from 'react';
+import { type FC } from 'react';
 
 interface MenuOption{
     label: string, 

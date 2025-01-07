@@ -10,6 +10,7 @@ import Page from './Page';
 import AddPage from './AddPage';
 import { PagesRecord } from '../../lib/pocketbase/pb-types';
 import { deleteDocument, ExpandedDoc, PageType, updateDocument, UpdateDocumentOptions } from '../../lib/document/service';
+import DeleteWarningDialog from './DeleteWarningDialog';
 
 
 function mapExpandedPages(pages: PagesRecord[]): UpdateDocumentOptions['pages'] {
@@ -27,11 +28,10 @@ const DetailView: FC<DetailViewProps> = (props) => {
     const [tags, setTags] = useState<UpdateDocumentOptions['tags']>(props.document.expand.tags);
     const [pages, setPages] = useState(mapExpandedPages(props.document.expand.pages));
     const [editMode, setEditMode] = useState(false);
+    const [deleteWarningModalOpen, setDeleteWarningModalOpen] = useState(false);
 
     const queryClient = useQueryClient()
     const router = useRouter()
-
-    console.log('pages', pages)
 
     useEffect(() => {
         setTags(props.document.expand.tags)
@@ -61,7 +61,7 @@ const DetailView: FC<DetailViewProps> = (props) => {
     function onMenuSelect(selected: MenuOptions){
         switch (selected) {
             case 'delete':
-                deleteMutation.mutate();
+                setDeleteWarningModalOpen(true);
                 return;
             case 'edit':
                 setEditMode(true);
@@ -95,7 +95,7 @@ const DetailView: FC<DetailViewProps> = (props) => {
         setPages(pages => pages.toSpliced(index, 1))
     }
     
-    return (
+    return (<>
         <div className='bg-gray-900 text-white grid grid-rows-[auto_1fr] h-screen'>
             <h2 className='flex items-center justify-items-center text-xl bg-gray-700 text-gray-300'>
                 <Link to='/' className="flex">
@@ -145,7 +145,15 @@ const DetailView: FC<DetailViewProps> = (props) => {
                 </div>
             }
         </div>
-    );
+        <DeleteWarningDialog
+            open={ deleteWarningModalOpen }
+            onOpenChange={ setDeleteWarningModalOpen }
+            onDelete={ () => {
+                setDeleteWarningModalOpen(false)
+                deleteMutation.mutate();
+            }}
+        />
+    </>);
 };
 
 export default DetailView;
