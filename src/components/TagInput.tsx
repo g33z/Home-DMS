@@ -1,7 +1,7 @@
 import { useRef, useState, type FC } from 'react';
 import Tag from './Tag';
 import { twMerge } from 'tailwind-merge';
-import type { TagType } from './detail-view/DetailView'
+import { TagType } from '../lib/document/service';
 
 interface TagInputProps {
     tags: TagType[]

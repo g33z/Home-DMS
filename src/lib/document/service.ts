@@ -1,5 +1,5 @@
 import pb from "../pocketbase";
-import { Expanded } from "../pocketbase/helper-types";
+import { CreateRecord, Expanded } from "../pocketbase/helper-types";
 import { DocumentsResponse, PagesRecord, TagsRecord, Collections } from "../pocketbase/pb-types";
 
 export type ExpandedDoc = Expanded<
@@ -67,4 +67,38 @@ export async function deleteDocument(document: ExpandedDoc) {
         document.pages.map(id => batch.collection(Collections.Pages).delete(id))
         await batch.send()
     }
+}
+
+export async function addDocument(tags: TagType[], pages: File[]) {
+    // add tags
+    const tagBatch = pb.createBatch()
+    tags.forEach(tag => 
+        tagBatch
+            .collection(Collections.Tags)
+            .create(
+                tag, 
+                { fields: 'id' }
+            )
+    )
+    const addedTagIds = await tagBatch.send().then(r => r.map(r => (r.body as TagsRecord).id))
+
+    // add pages
+    const addedPageIds: string[] = []
+    for(const page of pages){
+        await pb
+            .collection('pages')
+            .create(
+                { file: page }, 
+                { fields: 'id' }
+            )
+            .then(p => addedPageIds.push(p.id))
+    }
+
+    // add document
+    await pb
+        .collection('documents')
+        .create({
+            pages: addedPageIds,
+            tags: addedTagIds
+        })
 }

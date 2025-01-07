@@ -17,7 +17,7 @@ const HomePage: FC = (props) => {
     const documents = useQuery({ 
         queryFn: () => pb
             .collection('documents')
-            .getFullList<ExpandedDoc>({ expand: 'pages,tags' }),
+            .getFullList<ExpandedDoc>({ expand: 'pages,tags', sort: '-uploadedAt' }),
         queryKey: ['documents']
     });
 
