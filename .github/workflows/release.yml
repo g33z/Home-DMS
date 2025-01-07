@@ -30,7 +30,7 @@ jobs:
 
       - name: Compress build output
         run: |
-          zip -r home-dms-app-static-files.zip dist/public
+          zip -r home-dms-app-static-files.zip -j dist/public
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
