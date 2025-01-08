@@ -16,7 +16,7 @@ import DeleteWarningDialog from './DeleteWarningDialog';
 function mapExpandedPages(pages: PagesRecord[]): UpdateDocumentOptions['pages'] {
     return pages.map(page => ({
         id: page.id,
-        url: `${import.meta.env.WAKU_PUBLIC_PB_URL}/api/files/pages/${page.id}/${page.file}`
+        url: `${import.meta.env.WAKU_PUBLIC_PB_URL ?? ''}/api/files/pages/${page.id}/${page.file}`
     }))
 }
 
