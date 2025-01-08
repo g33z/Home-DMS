@@ -28,8 +28,10 @@ jobs:
           npm install
           npm run build
 
-      - name: Compress build output
-        run: (cd dist/public && zip -r ../../home-dms-app-static-files.zip .)
+      - name: Build release asset
+        run: |
+          cp -r dist/public pocketbase/pb_public
+          (cd pocketbase && zip -r ../home-dms-app-static-files.zip pb_migrations pb_public)
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2

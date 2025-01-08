@@ -11,4 +11,5 @@ test/data/images
 pb-types.ts
 pocketbase.exe
 pb_data
+pb_public
 *.gen.ts
