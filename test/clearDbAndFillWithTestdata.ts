@@ -18,25 +18,6 @@ if (!fs.existsSync(IMAGES_PATH)){
     fs.mkdirSync(IMAGES_PATH);
 }
 
-function getRandomImagePaths(){
-    const imagePaths = fs.readdirSync(IMAGES_PATH)
-    const filteredPaths = fs.readdirSync(IMAGES_PATH).filter(() => Math.random() < 0.08);
-
-    if(filteredPaths.length === 0){
-        filteredPaths.push(imagePaths[0]!);
-    }
-
-    return filteredPaths;
-}
-
-function getRandomImageFiles(){
-    return getRandomImagePaths()
-        .map(path => new File(
-            [fs.readFileSync(`${IMAGES_PATH}/${path}`)],
-            path,
-        ))
-}
-
 async function downloadTestImages() {
     const log = (img: number) => `Downloading image ${img}/${imageNames.length}`
     const spinner = ora(log(1)).start()
