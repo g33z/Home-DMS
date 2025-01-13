@@ -3,8 +3,12 @@
 @tailwind utilities;
 
 @layer base {
-    @font-face {
-      font-family: 'Outfit';
-      src: url(./fonts/Outfit.ttf);
-    }
+	@font-face {
+		font-family: 'Outfit';
+		src: url(./fonts/Outfit.ttf);
+	}
+
+	html, body {
+		@apply min-h-full;
+	}
 }

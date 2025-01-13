@@ -1,5 +1,5 @@
 import pb from "../pocketbase";
-import { CreateRecord, Expanded } from "../pocketbase/helper-types";
+import { Expanded } from "../pocketbase/helper-types";
 import { DocumentsResponse, PagesRecord, TagsRecord, Collections } from "../pocketbase/pb-types";
 
 export type ExpandedDoc = Expanded<
@@ -11,7 +11,7 @@ export type ExpandedDoc = Expanded<
 >
 
 export type TagType = { id?: string, keyword: string }
-export type PageType = { id: string, url: string, file?: undefined } | { id?: undefined, url: string, file: File }
+export type PageType = { id: string, url: string, file?: File }
 
 export interface UpdateDocumentOptions {
     tags: TagType[],
@@ -32,12 +32,13 @@ export async function updateDocument(document: ExpandedDoc, options: UpdateDocum
     // update pages
     const updatedPageIds: string[] = []
     for(const page of options.pages){
-        if(page.id !== undefined){
+        if(page.file === undefined){
             updatedPageIds.push(page.id)
         } else {
             updatedPageIds.push(await pb
                 .collection('pages')
                 .create({ file: page.file }, { fields: 'id' })
+                .then(tag => tag.id)
             )
         }
     }

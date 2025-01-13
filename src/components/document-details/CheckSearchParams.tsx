@@ -5,9 +5,9 @@ import type { FC } from 'react';
 import { useRouter_UNSTABLE as useRouter } from 'waku';
 import pb from '../../lib/pocketbase';
 import ErrorScreen from '../ErrorScreen';
-import DetailView from './DetailView';
 import LoadingScreen from '../LoadingScreen';
 import { ExpandedDoc } from '../../lib/document/service';
+import DocumentDetails from './DocumentDetails';
 
 
 const CheckSearchParams: FC = (props) => {
@@ -36,7 +36,7 @@ const CheckSearchParams: FC = (props) => {
         <LoadingScreen message='Loading Document...'/>
     );
 
-    return <DetailView document={ document.data }/>;
+    return <DocumentDetails document={ document.data }/>;
 };
 
 export default CheckSearchParams;

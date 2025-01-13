@@ -1,9 +1,14 @@
 import type { FC } from 'react';
-import CheckSearchParams from '../../components/detail-view/CheckSearchParams';
+import CheckSearchParams from '../../components/document-details/CheckSearchParams';
+import SubRoute from '../../components/sub-route';
  
 
 const DocumentDetails: FC = async (props) => {
-    return <CheckSearchParams/>;
+    return (
+		<SubRoute.Wrapper title='Document Details'>
+			<CheckSearchParams/>
+		</SubRoute.Wrapper>
+	);
 };
 
 export default DocumentDetails;

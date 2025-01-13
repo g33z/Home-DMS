@@ -8,6 +8,7 @@ Furthermore there are currently some limitations:
 - The webapp is build with 'mobile-first' in mind, which means it can be used on desktop but is not optimized for it yet. Expect weird layouts.
 - installing and updating might be a little complicated
 - it has no authentication, so only host it on your local and trusted network
+- pdf are not supported, only those image formats, that can also be displayed by your browser (png, jpeg etc.)
 - it only has the most basic features
 
 ## Installation
@@ -54,5 +55,5 @@ You will need [Node.js](https://nodejs.org/en/download) v20 installed on your sy
 ## License
 Home-DMS is licensed under the [MIT License](LICENSE.md).
 
-## Attribution:
+## Attribution
 - Device Mockup created from [Google Pixel 5 mockups](https://deviceframes.com/templates/google-pixel-5).

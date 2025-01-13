@@ -24,7 +24,7 @@ const Document: FC<DocumentProps> = (props) => {
             <Link to={ `/doc?id=${props.document.id}` } className="relative overflow-hidden">
                 <img 
                     loading='lazy' 
-                    src={ `${import.meta.env.WAKU_PUBLIC_PB_URL ?? ''}/api/files/pages/${thumbnailPage.id}/${thumbnailPage.file}?thumb=150x0` } 
+                    src={ `${import.meta.env.WAKU_PUBLIC_PB_URL ?? ''}/api/files/pages/${thumbnailPage.id}/${thumbnailPage.file}?thumb=400x0` } 
                     className='p-5 pb-px object-cover min-h-[10rem] w-full'
                     width='150'
                 />

@@ -22,7 +22,7 @@ const AddPage: FC<AddPageProps> = (props) => {
     
     return (
         <label 
-            className='flex gap-3 items-center justify-center p-2 rounded-md border-2 border-dashed border-gray-500 text-gray-300 text-lg cursor-pointer'
+            className='flex gap-3 items-center justify-center p-2 rounded-md border-2 border-dashed border-gray-500 text-gray-300 text-lg cursor-pointer relative'
             onClick={ () => setFileSelectLoading(true) }
         >
             <input 

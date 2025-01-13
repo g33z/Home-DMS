@@ -11,15 +11,16 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.8",
-    "@zag-js/dialog": "^0.80.0",
-    "@zag-js/menu": "^0.80.0",
-    "@zag-js/react": "^0.80.0",
+    "@zag-js/dialog": "^0.81.0",
+    "@zag-js/menu": "^0.81.0",
+    "@zag-js/react": "^0.81.0",
+    "@zag-js/toast": "^0.81.0",
     "pocketbase": "^0.25.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-server-dom-webpack": "19.0.0",
     "tailwind-merge": "^2.5.5",
-    "waku": "^0.21.12"
+    "waku": "^0.21.14"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.19",

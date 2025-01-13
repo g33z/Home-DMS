@@ -8,6 +8,7 @@ import Searchbar from './Searchbar';
 import { useQuery } from '@tanstack/react-query';
 import pb from '../../lib/pocketbase';
 import { ExpandedDoc, filterDocuments } from '../../lib/document/service';
+import LoadingScreen from '../LoadingScreen';
 
 
 const HomePage: FC = (props) => {
@@ -45,16 +46,16 @@ const HomePage: FC = (props) => {
     }
     
     return (
-        <div className='grid grid-rows-[auto_1fr] h-screen bg-gray-900'>
-			<header className="bg-gray-800 px-5 py-3 flex gap-5 shadow-lg">
-				<img src={ Icon } alt="Home-DMS Logo" className="w-8" />
-				<Searchbar value={ searchbarValue } onChange={ onSearch } onSubmit={ setSearch }/>
-			</header>
-			<main className='overflow-y-auto'>
-				{ filteredDocuments && 
+        <div className='h-screen grid grid-rows-[auto_1fr] bg-gray-900'>
+            <header className="px-5 py-3 flex gap-5 shadow-lg bg-gray-800">
+                <img src={ Icon } alt="Home-DMS Logo" className="w-8" />
+                <Searchbar value={ searchbarValue } onChange={ onSearch } onSubmit={ setSearch }/>
+            </header>
+            <main className='overflow-y-scroll'>
+                { filteredDocuments &&
                     <Documents
-                        documents={ filteredDocuments } 
-                        onTagClick={ keyword => 
+                        documents={ filteredDocuments }
+                        onTagClick={ keyword =>
                             setSearchbarValue(v => {
                                 const query = v
                                     ? `${searchbarValue} ${keyword}`
@@ -65,9 +66,17 @@ const HomePage: FC = (props) => {
                         }
                     />
                 }
-				<GoToNew className='absolute bottom-8 right-8 shadow'/>
-			</main>
-		</div>
+                { documents.isPending &&
+                    <LoadingScreen message='Documents loading...' className='h-full'/>
+                }
+                { documents.isError &&
+                    <div className='flex items-center justify-center text-lg text-white h-full'>
+                        Could not load Documents
+                    </div>
+                }
+                <GoToNew className='absolute bottom-8 right-8 shadow'/>
+            </main>
+        </div>
     );
 };
 
