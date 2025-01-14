@@ -5,6 +5,8 @@ interface FileSelectProps {
     onSelected: (files: File[]) => void
 }
 
+let count = 0;
+
 const FileSelect: FC<FileSelectProps> = (props) => {
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,15 +23,16 @@ const FileSelect: FC<FileSelectProps> = (props) => {
     }
     
     useEffect(() => {
+        if(history.state !== null){ // is the page loaded by user or by link - TODO: Detection does not work
+            count++
+            console.log('opened', count)
+            fileInputRef.current?.click();
+        }
+
         const onCancel = () => setLoading(false);
         fileInputRef.current?.addEventListener('cancel', onCancel)
         
         return () => fileInputRef.current?.removeEventListener('cancel', onCancel)
-    }, []);
-
-    useEffect(() => {
-        if(history.state === null) return; // is the page loaded by user or by link - TODO: Detection does not work
-        fileInputRef.current?.click();
     }, []);
     
     return (
@@ -38,7 +41,7 @@ const FileSelect: FC<FileSelectProps> = (props) => {
             onClick={ () => setLoading(true) }
         >
             <input 
-                className='sr-only' 
+                className='sr-only'
                 type='file' 
                 multiple 
                 onChange={choseFiles} 
