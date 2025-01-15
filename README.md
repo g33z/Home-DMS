@@ -1,6 +1,8 @@
 # ![Logo Lockup of Home-DMS](/docs/images/banner.webp)
 With Home-DMS you are able to categorize your digitized documents. It priorities ease of use through a well designed UI, while using modern and popular technologies.
 
+Join on Discord: ![Discord Banner](https://discord.com/api/guilds/1328764142030553151/widget.png?style=shield)
+
 ## Status: Alpha
 This project is in Alpha, so use with **caution**! Expect a rougher experience and to do manual steps when updating, like re-adding data or documents. While trying to keep those situations to a minimum it can't be guaranteed, that they'll never occur.
 
