@@ -3,6 +3,7 @@ import AddPage from './AddPage';
 import Page from './Page';
 import TagInput from './TagInput';
 import { PageType, TagType } from '../../lib/document/service';
+import { createId } from '@paralleldrive/cuid2';
 
 interface DetailViewProps {
     editMode: boolean
@@ -16,7 +17,7 @@ const DetailView: FC<DetailViewProps> = (props) => {
     function addPages(files: File[], index: number){
         props.onPagesChange(pages => 
             pages.toSpliced(index, 0, ...files.map(file => ({
-                id: crypto.randomUUID(),
+                id: createId(),
                 url: URL.createObjectURL(file),
                 file: file
             })))

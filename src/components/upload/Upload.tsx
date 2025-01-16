@@ -10,6 +10,7 @@ import FileSelect from './FileSelect';
 import { useToast } from '../primitves/toast/context';
 import SubRoute from '../sub-route';
 import DetailView from '../detail-view/DetailView';
+import { createId } from '@paralleldrive/cuid2';
 
 
 interface UploadProps {
@@ -36,7 +37,7 @@ const Upload: FC<UploadProps> = (props) => {
 		setPages(pages => [
 			...pages, 
 			...files.map(file => ({ 
-				id: crypto.randomUUID(),
+				id: createId(),
 				url: URL.createObjectURL(file),
 				file
 			}))

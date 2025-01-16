@@ -10,6 +10,7 @@
     "pb-ts-gen": "pocketbase-typegen --db ./pocketbase/pb_data/data.db --out ./src/lib/pocketbase/pb-types.ts"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
     "@tanstack/react-query": "^5.62.8",
     "@zag-js/dialog": "^0.81.0",
     "@zag-js/menu": "^0.81.0",
